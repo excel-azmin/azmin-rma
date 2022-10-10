@@ -1,0 +1,89 @@
+<form (ngSubmit)="onSubmit()">
+  <div class="mat-subheading-2" class="ion-text-capitalize">{{ column }}</div>
+  <mat-form-field *ngIf="column === 'stock_entry_type'">
+    <input
+      type="text"
+      placeholder="Select Stock Entry Type"
+      matInput
+      [formControl]="stock_entry_type"
+      [matAutocomplete]="autoStock"
+    />
+    <mat-autocomplete
+      autoActiveFirstOption
+      #autoStock="matAutocomplete"
+      [displayWith]="getStockTypeOption"
+    >
+      <mat-option *ngFor="let option of stockEntryType" [value]="option">
+        {{ option }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  
+  <mat-form-field *ngIf="column === 'item'">
+    <input
+      type="text"
+      placeholder="Select Item"
+      matInput
+      [formControl]="itemFormControl"
+      [matAutocomplete]="auto"
+    />
+    <mat-autocomplete
+      autoActiveFirstOption
+      #auto="matAutocomplete"
+      [displayWith]="getOptionText"
+    >
+      <mat-option
+        *ngFor="let option of filteredItemList | async"
+        [value]="option"
+      >
+        {{ option.item_name }} ( {{ option.item_code }} )
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field *ngIf="column === 'serial_no'">
+    <input
+      type="text"
+      placeholder="Enter a Serial No"
+      matInput
+      name="serial_no"
+      [(ngModel)]="serial_no"
+    />
+  </mat-form-field>
+
+  <mat-form-field *ngIf="column === 'warehouse'">
+    <input
+      type="text"
+      placeholder="Select Warehouse"
+      matInput
+      [formControl]="warehouseFormControl"
+      [matAutocomplete]="autoFetch"
+    />
+    <mat-autocomplete
+      autoActiveFirstOption
+      #autoFetch="matAutocomplete"
+      [displayWith]="getWarehouseOptionText"
+    >
+      <mat-option *ngFor="let option of warehouseList | async" [value]="option">
+        {{ option.warehouse }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field *ngIf="column === 'quantity'">
+    <input
+      matInput
+      type="number"
+      maxLength="140"
+      name="quantity"
+      [(ngModel)]="quantity"
+    />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button mat-button type="submit" color="primary">SAVE</button>
+  </div>
+</form>

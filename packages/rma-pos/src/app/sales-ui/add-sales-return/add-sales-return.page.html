@@ -1,0 +1,370 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Sales Return</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-fab
+    class="ion-margin-end"
+    slot="fixed"
+    vertical="top"
+    color="light"
+    horizontal="end"
+  >
+    <ion-fab-button class="fab-position" [disabled]="submitting" (click)="submitSalesReturn()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="tertiary">
+          Details
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="ion-no-padding">
+        <ion-row class="align">
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                readonly
+                value="RINV-####"
+                placeholder="Naming Series"
+              />
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                placeholder="Company"
+                readonly
+                [formControl]="companyFormControl"
+              />
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-row class="align">
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Customer"
+                readonly
+                [formControl]="customerFormControl"
+              />
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                [matDatepicker]="postingDate"
+                placeholder="Posting Date"
+                readonly
+                [formControl]="postingDateFormControl"
+              />
+              <mat-datepicker-toggle
+                matSuffix
+                [for]="postingDate"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #postingDate disabled="false"></mat-datepicker>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-row class="align">
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                placeholder="Branch"
+                readonly
+                [formControl]="branchFormControl"
+              />
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                type="text"
+                placeholder="Select Warehouse"
+                matInput
+                [formControl]="warehouseFormControl"
+                (focusout)="validateInput(warehouseFormControl, filteredWarehouseList)"
+                [matAutocomplete]="auto"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #auto="matAutocomplete"
+                [displayWith]="getOptionText"
+              >
+                <mat-option
+                  *ngFor="let option of filteredWarehouseList | async"
+                  [value]="option"
+                >
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="warehouseFormControl.hasError('falseValse')">
+                You should select a value from dropdown only. 
+                <strong>'{{warehouseFormControl.value}}'</strong> is not allowed.
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size-md="6">
+            <mat-form-field class="example-full-width">
+              <mat-label>Remarks</mat-label>
+              <textarea matInput [formControl]="remarks"></textarea>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-content>
+      <ion-grid class="ion-no-padding">
+        <ion-row class="align">
+          <ion-col class="ion-text-left">
+            <input
+              #csvFileInput
+              type="file"
+              id="txtFileUpload"
+              (change)="fileChangedEvent($event)"
+              accept=".csv"
+            />
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="tertiary">
+          Serial Range
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="ion-no-padding">
+        <ion-row>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                oninput="this.value = this.value.toUpperCase()"
+                matInput
+                placeholder="From Range"
+                type="text"
+                name="From Range"
+                [(ngModel)]="rangePickerState.fromRange"
+                (ngModelChange)="this.fromRangeUpdate.next($event)"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width">
+              <input
+                type="text"
+                oninput="this.value = this.value.toUpperCase()"
+                matInput
+                placeholder="To Range"
+                type="string"
+                name="To Range"
+                [(ngModel)]="rangePickerState.toRange"
+                (ngModelChange)="this.toRangeUpdate.next($event)"
+              />
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <ion-text color="primary">
+              <h3>Total : {{ rangePickerState.serials.length }}</h3>
+            </ion-text>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="tertiary">
+          Products
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <mat-table #table [dataSource]="itemDataSource" style="width: 100%;">
+        <ng-container matColumnDef="salesWarrantyMonths">
+          <mat-header-cell *matHeaderCellDef
+            >Warranty In Months</mat-header-cell
+          >
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.salesWarrantyMonths }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.qty }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="assigned">
+          <mat-header-cell *matHeaderCellDef>Returned</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.assigned || 0 }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="remaining">
+          <mat-header-cell *matHeaderCellDef>Remaining</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.remaining || 0 }}
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="has_serial_no">
+          <mat-header-cell *matHeaderCellDef>Has Serial</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <mat-checkbox
+              class="example-margin"
+              [(ngModel)]="row.has_serial_no"
+              [disabled]="true"
+            >
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="add_serial">
+          <mat-header-cell *matHeaderCellDef>Add Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ion-button
+              [disabled]="row.remaining === 0"
+              fill="outline"
+              (click)="assignSerial(row)"
+            >
+              <ion-icon name="Add"></ion-icon>
+            </ion-button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="itemDisplayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row *matRowDef="let row; columns: itemDisplayedColumns"></mat-row>
+      </mat-table>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="tertiary">
+          Serials
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <mat-table #table [dataSource]="serialDataSource" style="width: 100%;">
+
+        <ng-container matColumnDef="sr_no">
+          <mat-header-cell *matHeaderCellDef>No. </mat-header-cell>
+          <mat-cell *matCellDef="let row;let i=index ">
+            {{ i }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_code">
+          <mat-header-cell *matHeaderCellDef>Item Code</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_code }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.qty }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="serial_no">
+          <mat-header-cell *matHeaderCellDef>Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row;let i=index">
+            <input
+              matInput
+              (keyup.enter)="onSerialKepUp(i)"
+              id="serials{{i}}"
+              oninput="this.value = this.value.toUpperCase()"
+              *ngIf="!row.serial_no[1]"
+              [disabled]="row.serial_no[0] === 'Non Serial Item' ? true : false"
+              [(ngModel)]="row.serial_no[0]"
+            />
+            <p *ngIf="row.serial_no.length === 1 ? false : true">
+              {{ getSerialsInputValue(row) }}
+            </p>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="delete">
+          <mat-header-cell *matHeaderCellDef>Delete Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <ion-button color="danger" fill="clear" (click)="deleteRow(row, i)">
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="serialDisplayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row
+          *matRowDef="let row; columns: serialDisplayedColumns; let i = index"
+        ></mat-row>
+      </mat-table>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

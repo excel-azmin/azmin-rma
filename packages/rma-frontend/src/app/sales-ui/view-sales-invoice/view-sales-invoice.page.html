@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title> Sales Invoice </ion-title>
+    <ion-buttons slot="end" *ngIf="sales_invoice_name">
+      <ion-button (click)="showJobs()" color="primary"> Jobs </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end" *ngIf="sales_invoice_name && status !== 'Canceled'">
+      <ion-button (click)="showPrintOptions($event)" color="primary">
+        <ion-icon slot="icon-only" name="print-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header class="ion-no-padding">
+      <ion-segment
+        [(ngModel)]="selectedSegment"
+        scrollable="true"
+        class="disable-scrollbars"
+      >
+        <ion-segment-button
+          value="0"
+          *ngIf="permissionState.sales_invoice.active"
+        >
+          <ion-label>Details</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          value="1"
+          *ngIf="status !== 'Canceled' && sales_invoice_name && permissionState.delivery_note.active"
+        >
+          <ion-label>Serials</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          value="2"
+          *ngIf="status !== 'Canceled' && sales_invoice_name"
+        >
+          <ion-label>Accounts</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          value="3"
+          *ngIf="status !== 'Canceled' && sales_invoice_name && permissionState.delivery_note.active"
+        >
+          <ion-label>Returned Serials</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          value="4"
+          *ngIf="status !== 'Canceled' && sales_invoice_name && permissionState.warranty_claim.active"
+        >
+          <ion-label>Warranty</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          value="5"
+          disabled="{{isCampaign ? true : false }}"
+          *ngIf="status !== 'Canceled' && sales_invoice_name && showReturnTab && permissionState.credit_note.active"
+        >
+          <ion-label>Credit Notes</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-card-header>
+  </ion-card>
+
+  <div [ngSwitch]="selectedSegment">
+    <sales-invoice-details class="width" *ngSwitchCase="0">
+    </sales-invoice-details>
+    <sales-invoice-serials class="width" *ngSwitchCase="1">
+    </sales-invoice-serials>
+    <sales-invoice-accounts
+      [sales_invoice]="sales_invoice_name"
+      class="width"
+      *ngSwitchCase="2"
+    ></sales-invoice-accounts>
+    <sales-invoice-return-serials
+      [salesInvoiceName]="sales_invoice_name"
+      class="width"
+      *ngSwitchCase="3"
+    >
+    </sales-invoice-return-serials>
+    <sales-invoice-warranty
+      class="width"
+      *ngSwitchCase="4"
+    ></sales-invoice-warranty>
+    <sales-invoice-credit-notes
+      [sales_invoice]="sales_invoice_name"
+      class="width"
+      *ngSwitchCase="5"
+    >
+    </sales-invoice-credit-notes>
+  </div>
+</ion-content>

@@ -1,0 +1,10 @@
+<div mat-dialog-content>
+    <p>Would you like assign all {{data.remaining}}?</p>
+    <mat-form-field>
+        <mat-label>Select a quantity</mat-label>
+        <input type="number" min="0" max="data.qty" required matInput [(ngModel)]="data.qty" >
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="data.qty" cdkFocusInitial>Ok</button>
+</div>

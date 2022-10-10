@@ -1,0 +1,67 @@
+<ion-card>
+    
+    
+    <div class="loading-shade" *ngIf="deliveredSerialsDataSource?.loading$ | async">
+        <mat-progress-bar *ngIf="deliveredSerialsDataSource?.loading$ | async" mode="indeterminate"></mat-progress-bar>
+    </div>
+    
+    <ion-card-header>
+        <ion-row class="align">
+            <ion-col>
+                <ion-card-title>
+                    <ion-text color="tertiary">
+                        Delivered Serials
+                    </ion-text>
+                </ion-card-title>
+            </ion-col>
+            <ion-col class="ion-text-right">
+                <ion-button class="ion-text-right" [disabled]="!deliveredSerialsDataSource?.length || permissionState?.serial_dump?.active" color="tertiary" (click)="downloadSerials()">
+                    Download CSV
+                </ion-button>
+                <ion-button class="ion-text-right" color="tertiary" (click)="getDeliveredSerials()">
+                    Get Serials
+                </ion-button>
+            </ion-col>
+        </ion-row>
+    </ion-card-header>
+    
+    <div class="search-models ion-padding">
+        <mat-form-field class="mat-input-wrapper">
+            <input matInput placeholder="Search" [(ngModel)]="deliveredSerialsSearch" (keyup.enter)="setFilter()" />
+            <button mat-button matSuffix (click)="setFilter()">
+                <mat-icon>search</mat-icon>
+    </button>
+</mat-form-field>
+</div>
+<mat-table #table [dataSource]="deliveredSerialsDataSource" style="width: 100%; max-height: 58vh; overflow: auto;">
+    <ng-container matColumnDef="sr_no">
+        <mat-header-cell *matHeaderCellDef> No </mat-header-cell>
+        <mat-cell *matCellDef="let row; let i = index">
+            {{ i + 1 }}
+        </mat-cell>
+    </ng-container>
+    
+    <div *ngFor="let cell of deliveredSerialsState?.deliveredSerialsDisplayedColumns">
+        <ng-container  *ngIf="cell !== 'sr_no'" [matColumnDef]="cell">
+                <mat-header-cell *matHeaderCellDef > {{cell}}</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <div>
+                        {{ getDateCell(cell) ? (row[cell] | date: 'd MMM, y') : row[cell]}}
+                    </div>
+                </mat-cell>
+        </ng-container>
+    </div>
+        
+        <mat-header-row *matHeaderRowDef="deliveredSerialsState?.deliveredSerialsDisplayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="
+        let row;
+        columns: deliveredSerialsState?.deliveredSerialsDisplayedColumns;
+        let i = index
+        "></mat-row>
+    </mat-table>
+    <mat-card-actions>
+        <mat-paginator #paginator class="mat-paginator-sticky" (page)="getUpdate($event)" [length]="deliveredSerialsDataSource?.length" [pageSizeOptions]="[30, 50, 100, 500]">
+        </mat-paginator>
+    </mat-card-actions>
+</ion-card>
+    

@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>View Warranty Claims</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header class="ion-no-padding">
+      <ion-segment
+        [(ngModel)]="selectedSegment"
+        scrollable="true"
+        class="disable-scrollbars"
+      >
+        <ion-segment-button value="0">
+          <ion-label>Details</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          *ngIf="warrantyDetail?.claim_status !== 'Cancelled'"
+          value="1"
+        >
+          <ion-label>Service Invoice</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          *ngIf="warrantyDetail?.claim_status !== 'Cancelled'"
+          value="2"
+        >
+          <ion-label>Status</ion-label>
+        </ion-segment-button>
+        <ion-segment-button
+          *ngIf="warrantyDetail?.claim_status !== 'Cancelled'"
+          value="3"
+        >
+          <ion-label>Stock</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-card-header>
+  </ion-card>
+  <div [ngSwitch]="selectedSegment">
+    <claim-details *ngSwitchCase="0"> </claim-details>
+    <service-invoices *ngSwitchCase="1" [warrantyObject]="warrantyDetail">
+    </service-invoices>
+    <status-history *ngSwitchCase="2" [warrantyObject]="warrantyDetail">
+    </status-history>
+    <stock-entry *ngSwitchCase="3" [warrantyObject]="warrantyDetail">
+    </stock-entry>
+  </div>
+</ion-content>

@@ -1,0 +1,60 @@
+<ion-card class="ion-no-margin">
+  <ion-card-header>
+    <ion-card-title>
+      Update Credit Limit
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <form [formGroup]="creditLimitForm">
+      <mat-form-field class="mat-input-wrapper">
+        <input
+          matInput
+          readonly
+          placeholder="Customer"
+          aria-label="Customer"
+          formControlName="customer"
+        />
+      </mat-form-field>
+      <mat-form-field class="mat-input-wrapper" (click)="toggleBaseLimit()">
+        <input
+          matInput
+          type="number"
+          placeholder="Base Limit"
+          aria-label="Base Limit"
+          formControlName="baseLimit"
+        />
+      </mat-form-field>
+      <mat-form-field class="mat-input-wrapper" (click)="toggleERPNextLimit()">
+        <input
+          matInput
+          type="number"
+          required
+          placeholder="Extended ERPNext Credit Limit"
+          formControlName="erpnextLimit"
+        />
+      </mat-form-field>
+      <mat-form-field class="mat-input-wrapper" (click)="toggleExpiryDate()">
+        <input
+          matInput
+          readonly
+          [matDatepicker]="expiryDate"
+          required
+          placeholder="Expiry Date"
+          aria-label="Expiry Date"
+          formControlName="expiryDate"
+        />
+        <mat-datepicker-toggle matSuffix [for]="expiryDate">
+        </mat-datepicker-toggle>
+        <mat-datepicker #expiryDate disabled="false"></mat-datepicker>
+      </mat-form-field>
+    </form>
+  </ion-card-content>
+  <div class="actions ion-padding">
+    <button mat-button type="button" color="primary" (click)="onUpdate()">
+      Update
+    </button>
+    <button mat-button type="button" color="light" (click)="onCancel()">
+      Cancel
+    </button>
+  </div>
+</ion-card>

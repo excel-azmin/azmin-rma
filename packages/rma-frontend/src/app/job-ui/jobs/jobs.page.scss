@@ -1,0 +1,33 @@
+
+.full-width {
+  width: 100%;
+}
+
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+// common width for all columns
+[class*='mat-column-']{
+  flex: 0 0 13.5% !important;
+  min-width: 200px !important;
+}
+
+// similarly override any table column with name from matColumnDef.
+.mat-column-failCount {
+  flex: 0 0 5% !important;
+  min-width: 50px !important;
+}
+
+.mat-column-parent {
+  flex: 0 0 20% !important;
+  min-width: 300px !important;
+}
+
+.mat-column-serial_no {
+  flex: 0 0 20% !important;
+  min-width: 300px !important;
+}

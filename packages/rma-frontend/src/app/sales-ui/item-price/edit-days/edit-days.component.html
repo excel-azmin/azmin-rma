@@ -1,0 +1,32 @@
+<form (ngSubmit)="onSubmit()">
+  <div
+    class="mat-subheading-2"
+    class="ion-text-capitalize"
+    *ngIf="column === 'purchase'"
+  >
+    Purchase Warranty Months
+  </div>
+  <div
+    class="mat-subheading-2"
+    class="ion-text-capitalize"
+    *ngIf="column === 'sales'"
+  >
+    Sales Warranty Months
+  </div>
+  <mat-form-field>
+    <input
+      matInput
+      type="number"
+      maxLength="140"
+      name="days"
+      [(ngModel)]="days"
+    />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button mat-button type="submit" color="primary">SAVE</button>
+  </div>
+</form>

@@ -1,0 +1,31 @@
+<ion-item
+  [href]="printSalesInvoiceURL"
+  target="_blank"
+  lines="none"
+  (click)="closePopover()"
+>
+  <ion-label>Sales Invoice</ion-label>
+</ion-item>
+
+<ion-item
+  [href]="printSalesChallanURL"
+  target="_blank"
+  lines="none"
+  (click)="closePopover()"
+>
+  <ion-label>Sales Challan</ion-label>
+</ion-item>
+
+<ion-item
+  lines="none"
+  (click)="modifyMRPPrint()"
+>
+  <ion-label>MRP Sales Invoice</ion-label>
+</ion-item>
+<!-- <ion-item
+  lines="none"
+  disabled="{{ printDeliveryNoteURL === '' ? true : false }}"
+  (click)="printDeliveryNote()"
+>
+  <ion-label>Delivery Note</ion-label>
+</ion-item> -->

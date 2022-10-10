@@ -1,0 +1,7 @@
+<div mat-dialog-content>
+    <p>Another claim in Queue. Do you want to retry?</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-raised-button (click)="onNoClick()" color="warn">Cancel</button>
+    <button mat-raised-button cdkFocusInitial (click)="Retry()" color="primary">Retry</button>
+  </div>

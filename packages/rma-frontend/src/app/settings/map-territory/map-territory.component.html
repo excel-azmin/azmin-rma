@@ -1,0 +1,55 @@
+<ion-card class="ion-no-margin">
+  <ion-card-header>
+    <ion-card-title>
+      Map Warehouse
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <form [formGroup]="territoryForm">
+      <mat-form-field class="mat-input-wrapper">
+        <input
+          matInput
+          required
+          placeholder="Territory"
+          aria-label="Territory"
+          (focusout)="validateInput(f.territory, territories)"
+          [matAutocomplete]="autoTerritory"
+          formControlName="territory">
+        <mat-autocomplete #autoTerritory="matAutocomplete">
+          <mat-option *ngFor="let territory of territories | async" [value]="territory.name">
+            <span>{{territory.name}}</span>
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="f.territory.hasError('falseValse')">
+          You should select a value from dropdown only. 
+          <strong>'{{f.territory.value}}'</strong> is not allowed.
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-input-wrapper">
+        <input
+          matInput
+          required
+          placeholder="Warehouse"
+          aria-label="Warehouse"
+          (focusout)="validateInput(f.warehouse, warehouses)"
+          [matAutocomplete]="autoWH"
+          formControlName="warehouse">
+        <mat-autocomplete #autoWH="matAutocomplete">
+          <mat-option *ngFor="let warehouse of warehouses | async" [value]="warehouse.name">
+            <span>{{warehouse.name}}</span>
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="f.warehouse.hasError('falseValse')">
+          You should select a value from dropdown only. 
+          <strong>'{{f.warehouse.value}}'</strong> is not allowed.
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </ion-card-content>
+  <div class="actions ion-padding">
+    <button mat-button type="button" *ngIf="editTerritory" color="primary" (click)="onUpdate()">Update</button>
+    <button mat-button type="button" *ngIf="createTerritory" color="primary" (click)="onCreate()">Save</button>
+    <button mat-button type="button" *ngIf="editTerritory" color="warn" (click)="onDelete()">Delete</button>
+    <button mat-button type="button" color="light" (click)="onCancel()">Cancel</button>
+  </div>
+</ion-card>

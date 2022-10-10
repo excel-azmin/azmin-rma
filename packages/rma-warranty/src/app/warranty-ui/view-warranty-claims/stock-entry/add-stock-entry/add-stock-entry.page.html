@@ -1,0 +1,327 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Stock Entry</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-fab
+    *ngIf="permissionState.rma_stock_entry.create"
+    class="ion-margin-end"
+    slot="fixed"
+    vertical="top"
+    color="light"
+    horizontal="end"
+  >
+    <ion-fab-button
+      class="fab-position"
+      [disabled]="stockEntryForm.invalid"
+      (click)="createDeliveryNotes()"
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <form [formGroup]="stockEntryForm">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title color="tertiary"> Details </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="i-no-padding">
+          <ion-row class="align">
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  type="text"
+                  required
+                  placeholder="Stock Entry Type"
+                  formControlName="type"
+                  [matAutocomplete]="Type"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #Type="matAutocomplete"
+                  (keyup.enter)="setStockEntryType($event.option.value)"
+                  (optionSelected)="setStockEntryType($event.option.value)"
+                >
+                  <mat-option *ngFor="let option of type" [value]="option">
+                    {{ option }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="this.f.type.hasError('required')">
+                  Type is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  required
+                  [matDatepicker]="date"
+                  placeholder="Date"
+                  formControlName="date"
+                  (dateChange)="setDateTime($event)"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="date"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #date disabled="false"></mat-datepicker>
+                <mat-error *ngIf="this.f.date.hasError('required')">
+                  Date is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row class="align">
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  placeholder="Description"
+                  formControlName="description"
+                />
+                <mat-error *ngIf="this.f.description.hasError('required')">
+                  Description is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col> </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Items </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right" size="auto">
+          <ion-button
+            *ngIf="permissionState.rma_stock_entry.create"
+            color="tertiary"
+            fill="outline"
+            matTooltip=" ( ctrl + i ) "
+            matTooltipPosition="above"
+            matTooltipClass="tooltip"
+            (ctrlI)="AddItem({})"
+            (click)="AddItem({})"
+            [disabled]="button_active"
+          >
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <ion-item lines="none">
+        <mat-table #table [dataSource]="dataSource" style="width: 100%">
+          <ng-container matColumnDef="stock_entry_type">
+            <mat-header-cell *matHeaderCellDef>
+              Stock Entry Type
+            </mat-header-cell>
+            <mat-cell
+              *matCellDef="let row; let i = index"
+              [satPopoverAnchor]="stock"
+              tabindex="0"
+              (keyup.enter)="stock.open()"
+              (click)="stock.open()"
+            >
+              <ng-container *ngIf="row.stock_entry_type">
+                {{ row.stock_entry_type }}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.stock_entry_type">
+                Stock Entry Type
+              </span>
+              <sat-popover
+                #stock
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateItem(i,$event)"
+              >
+                <inline-edit
+                  *ngIf="warrantyObject?.claim_type === 'Third Party Warranty' || this.f.type.value === 'Spare Parts'"
+                  style="width: 400px !important"
+                  [value]="row.stock_entry_type"
+                  column="stock_entry_type"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="item_name">
+            <mat-header-cell *matHeaderCellDef> Item </mat-header-cell>
+            <mat-cell
+              *matCellDef="let row; let i = index"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container *ngIf="row.item_name">
+                {{ row.item_name }}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.item_name">
+                Add an item
+              </span>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateItem(i,$event)"
+              >
+                <inline-edit
+                  *ngIf="enableItemEdit(row)"
+                  style="width: 400px !important"
+                  [value]="row.item_name"
+                  column="item"
+                  [minimumPrice]="row.minimumPrice"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="serial_no">
+            <mat-header-cell *matHeaderCellDef> Serial No </mat-header-cell>
+            <mat-cell
+              *matCellDef="let row; let i = index"
+              [satPopoverAnchor]="popover"
+              tabindex="0"
+              (keyup.enter)="popover.open()"
+              (click)="popover.open()"
+            >
+              <ng-container *ngIf="row.serial_no">
+                {{ row.serial_no }}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.serial_no">
+                Add Serial No
+              </span>
+              <sat-popover
+                #popover
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateSerial(i,$event)"
+              >
+                <inline-edit
+                  *ngIf="enableSerialNoEdit(row)"
+                  style="width: 400px !important"
+                  [value]="row.serial_no"
+                  column="serial_no"
+                  [minimumPrice]="row.minimumPrice"
+                  [type]="warrantyObject?.claim_type"
+                  [item]="item"
+                  [stock_type]="row.stock_entry_type"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="source_warehouse">
+            <mat-header-cell *matHeaderCellDef>
+              Source Warehouse
+            </mat-header-cell>
+            <mat-cell
+              *matCellDef="let row; let i = index"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container *ngIf="row.s_warehouse">
+                {{ row.s_warehouse }}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.s_warehouse">
+                Add a Warehouse
+              </span>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateItem(i,$event)"
+              >
+                <inline-edit
+                  style="width: 400px !important"
+                  [value]="row.s_warehouse"
+                  column="warehouse"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <mat-header-cell *matHeaderCellDef> Quantity </mat-header-cell>
+            <mat-cell
+              *matCellDef="let row; let i = index"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container> {{ row.qty }} </ng-container>
+              <span class="add-comment" *ngIf="!row.qty"> Quantity </span>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateItem(i, $event)"
+              >
+                <inline-edit
+                  *ngIf="enableQuantityEdit()"
+                  [value]="row.qty"
+                  column="quantity"
+                  [minimumPrice]="row.minimumPrice"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row ; let i = index">
+              <ion-button
+                (click)="deleteRow(i)"
+                fill="clear"
+                class="ion-no-padding"
+                color="danger"
+              >
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-button>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <mat-header-row
+            *matHeaderRowDef="displayedColumns; sticky: true"
+          ></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          <mat-footer-row
+            class="footer"
+            *matFooterRowDef="displayedColumns; sticky: true"
+          ></mat-footer-row>
+        </mat-table>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

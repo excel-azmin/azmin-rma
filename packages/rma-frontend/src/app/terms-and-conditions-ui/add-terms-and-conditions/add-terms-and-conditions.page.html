@@ -1,0 +1,49 @@
+<form style="height: 100%">
+  <div
+    class="mat-subheading-2 ion-text-capitalize"
+    *ngIf="passedFrom === 'add'"
+  >
+    Add Terms and Conditions
+  </div>
+  <div
+    class="mat-subheading-2 ion-text-capitalize"
+    *ngIf="passedFrom === 'update'"
+  >
+    Update Terms and Conditions
+  </div>
+  <mat-form-field>
+    <textarea
+      matInput
+      required
+      placeholder="Terms and Conditions"
+      [formControl]="termsAndConditionsFormControl"
+    ></textarea>
+    <mat-error *ngIf="termsAndConditionsFormControl.errors">
+      Required!
+    </mat-error>
+  </mat-form-field>
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button
+      mat-button
+      (click)="addTermsAndConditions()"
+      color="primary"
+      [disabled]="disableAction"
+      *ngIf="passedFrom === 'add'"
+    >
+      ADD
+    </button>
+    <button
+      mat-button
+      (click)="updateTermsAndConditions()"
+      color="primary"
+      *ngIf="passedFrom === 'update'"
+      [disabled]="disableAction"
+    >
+      UPDATE
+    </button>
+  </div>
+</form>
+<!-- </ion-content> -->

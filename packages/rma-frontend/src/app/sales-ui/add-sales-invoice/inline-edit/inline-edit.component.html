@@ -1,0 +1,55 @@
+<form (ngSubmit)="onSubmit()">
+  <div class="mat-subheading-2" class="ion-text-capitalize">{{ column }}</div>
+  <mat-form-field *ngIf="column === 'item'">
+    <input
+      type="text"
+      placeholder="Select Item"
+      matInput
+      [formControl]="itemFormControl"
+      [matAutocomplete]="auto"
+    />
+    <mat-autocomplete
+      autoActiveFirstOption
+      #auto="matAutocomplete"
+      [displayWith]="getOptionText"
+    >
+      <mat-option
+        *ngFor="let option of filteredItemList | async"
+        [value]="option"
+      >
+        {{ option.item_name }} ( {{ option.item_code }} )
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field *ngIf="column === 'quantity'">
+    <input
+      matInput
+      type="number"
+      maxLength="140"
+      name="quantity"
+      [(ngModel)]="quantity"
+    />
+  </mat-form-field>
+
+  <mat-form-field *ngIf="column === 'rate'">
+    <input
+      matInput
+      type="number"
+      maxLength="140"
+      name="rate"
+      [formControl]="rateFormControl"
+    />
+
+    <mat-error *ngIf="rateFormControl.errors">
+      This rate is not accepted!
+    </mat-error>
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button mat-button type="submit" color="primary">SAVE</button>
+  </div>
+</form>

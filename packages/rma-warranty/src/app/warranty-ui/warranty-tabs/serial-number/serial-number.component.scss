@@ -1,0 +1,31 @@
+.full-width-table {
+  width: 100%;
+}
+
+.search-models {
+  padding: 0em 1em 0em 1em;
+}
+
+.table-container {
+  min-height: 45vh;
+  max-height: 45vh;
+  overflow: auto;
+}
+.example-full-width {
+  width: 100%;
+  color: black;
+}
+
+.mat-paginator-sticky {
+  bottom: 0px;
+  position: sticky;
+  z-index: 10;
+}
+
+.full-width {
+  width: 100%;
+}
+
+td {
+  text-align: left;
+}

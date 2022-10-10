@@ -1,0 +1,152 @@
+<ion-app>
+  <ion-split-pane contentId="main-content">
+    <ion-menu contentId="main-content" type="overlay">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Menu</ion-title>
+          <ion-button slot="end" (click)="login()" size="small" fill="clear">
+            <ion-icon name="refresh">Refresh Session</ion-icon>
+          </ion-button>
+          <ion-text class="ion-margin-end" slot="end" color="primary">
+            <ng-container *ngIf="counter > 0">
+              {{ counter | formatTime }}
+            </ng-container>
+          </ion-text>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-grid *ngIf="loggedIn" class="no-padding">
+          <ion-row class="align">
+            <ion-col *ngIf="imageURL">
+              <ion-avatar class="avatar">
+                <img src="{{ imageURL }}" />
+              </ion-avatar>
+            </ion-col>
+            <ion-col *ngIf="!imageURL">
+              <ion-avatar class="avatar">
+                <img src="../assets/alternative.svg" />
+              </ion-avatar>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-text class="name">
+                {{ fullName }}
+              </ion-text>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <ion-list>
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              routerDirection="'root'"
+              *ngIf="!loggedIn"
+              routerLink="/"
+              (click)="login()"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="log-in"></ion-icon>
+              <ion-label>Login</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              routerDirection="'root'"
+              *ngIf="loggedIn"
+              routerLink="/home"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="home"></ion-icon>
+              <ion-label>Home</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              *ngIf="loggedIn"
+              routerLink="/warranty"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="repeat"></ion-icon>
+              <ion-label>Warranty</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              *ngIf="loggedIn"
+              routerLink="/service-invoice"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="receipt"></ion-icon>
+              <ion-label>Service Invoice</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              *ngIf="loggedIn"
+              routerLink="/balance-summary"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="trending-up-outline"></ion-icon>
+              <ion-label>Stock Balance Summary</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              *ngIf="loggedIn"
+              routerLink="/serial-search"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="barcode"></ion-icon>
+              <ion-label>Serial Search</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item
+              button
+              *ngIf="loggedIn"
+              (click)="openSalesPortal()"
+              lines="none"
+              routerLinkActive="active"
+            >
+              <ion-icon slot="start" name="desktop-outline"></ion-icon>
+              <ion-label>Sales Portal</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-item
+            button
+            routerDirection="'root'"
+            routerLink="/"
+            *ngIf="loggedIn"
+            (click)="logout()"
+            class="clickable"
+            lines="none"
+          >
+            <ion-icon slot="start" name="log-out"></ion-icon>
+            <ion-label>Logout</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-split-pane>
+</ion-app>

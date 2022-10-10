@@ -1,0 +1,471 @@
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary"> Warranty Details </ion-text>
+        </ion-card-title>
+      </ion-col>
+      <ion-col class="ion-text-right">
+        <ion-fab
+          color="danger"
+          horizontal="end"
+          *ngIf="
+            permissionState.warranty_claim.read &&
+            warrantyClaimsDetails?.claim_status !== 'Cancelled'
+          "
+        >
+          <ion-fab-button color="primary">
+            <ion-icon name="chevron-back-circle-outline"></ion-icon>
+          </ion-fab-button>
+          <ion-fab-list side="start">
+            <ion-fab-button
+              *ngIf="
+                permissionState.warranty_claim.update &&
+                warrantyClaimsDetails?.claim_status !== 'Cancelled'
+              "
+              [routerLink]="[
+                '/warranty/edit-warranty-claim',
+                warrantyClaimsDetails.uuid
+              ]"
+              matTooltip="edit"
+              matTooltipPosition="above"
+              matTooltipClass="tooltip"
+              color="warning"
+            >
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-fab-button>
+            <ion-fab-button
+              *ngIf="
+                permissionState.warranty_claim.delete &&
+                warrantyClaimsDetails?.claim_status !== 'Cancelled'
+              "
+              (click)="openConfirmDialog()"
+              matTooltip="cancel"
+              matTooltipPosition="above"
+              matTooltipClass="tooltip"
+              color="danger"
+            >
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </ion-fab-button>
+            <ion-fab-button
+              *ngIf="
+                permissionState.warranty_claim.read &&
+                warrantyClaimsDetails?.claim_status !== 'Cancelled'
+              "
+              (click)="openDialog()"
+              matTooltip="print"
+              matTooltipPosition="above"
+              matTooltipClass="tooltip"
+              (ctrlM)="openDialog()"
+              color="primary"
+            >
+              <ion-icon name="print-outline"></ion-icon>
+            </ion-fab-button>
+          </ion-fab-list>
+        </ion-fab>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Claim No</ion-label>
+            <ion-input
+              placeholder="Claim No"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.claim_no
+                  ? warrantyClaimsDetails.claim_no
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Warranty End Date</ion-label>
+            <ion-input
+              placeholder="Warranty End Date"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.warranty_end_date
+                  ? warrantyClaimsDetails.warranty_end_date
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Receive Date & Time</ion-label>
+            <ion-input
+              placeholder="Receive Date & Time"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.received_on
+                  ? warrantyClaimsDetails.received_on
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Receiving Branch</ion-label>
+            <ion-input
+              placeholder="Delivery Branch"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.receiving_branch
+                  ? warrantyClaimsDetails.receiving_branch
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Received By</ion-label>
+            <ion-input
+              placeholder="Received By"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.received_by
+                  ? warrantyClaimsDetails.received_by
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Deliver Date & Time</ion-label>
+            <ion-input
+              placeholder="Receive Date & Time"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.delivery_date
+                  ? warrantyClaimsDetails.delivery_date
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Delivery Branch</ion-label>
+            <ion-input
+              placeholder="Delivery Branch"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.delivery_branch
+                  ? warrantyClaimsDetails.delivery_branch
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Delivered By</ion-label>
+            <ion-input
+              placeholder="Delivered By"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.delivered_by
+                  ? warrantyClaimsDetails.delivered_by
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-button
+            *ngIf="warrantyClaimsDetails.parent"
+            color="primary"
+            [routerLink]="[
+              '/bulk-warranty-claim',
+              bulkClaimNo,
+              warrantyClaimsDetails?.parent
+            ]"
+            >{{ bulkClaimNo }}</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary"> Product Details </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Serial Number</ion-label>
+            <ion-input
+              placeholder="Serial Number"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.serial_no
+                  ? warrantyClaimsDetails.serial_no
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Claim Type</ion-label>
+            <ion-input
+              placeholder="Claim Type"
+              readonly="true"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.claim_type
+                  ? warrantyClaimsDetails.claim_type
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">INV No</ion-label>
+            <ion-input
+              placeholder="INV No"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.invoice_no
+                  ? warrantyClaimsDetails.invoice_no
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Product Name</ion-label>
+            <ion-input
+              placeholder="Product Name"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.item_name
+                  ? warrantyClaimsDetails.item_name
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Product Brand</ion-label>
+            <ion-input
+              placeholder="Product Brand"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.product_brand
+                  ? warrantyClaimsDetails.product_brand
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Problem</ion-label>
+            <ion-input
+              placeholder="Problem"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.problem
+                  ? warrantyClaimsDetails.problem
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Problem Details</ion-label>
+            <ion-input
+              placeholder="Problem Details"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.problem_details
+                  ? warrantyClaimsDetails.problem_details
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating"
+              >Additional Receive/Remarks</ion-label
+            >
+            <ion-input
+              placeholder="Additional Receive/Remarks"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.remarks
+                  ? warrantyClaimsDetails.remarks
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary"> Customer Details </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Customer Name</ion-label>
+            <ion-input
+              placeholder="Customer Name"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.customer
+                  ? warrantyClaimsDetails.customer
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Third Party Name</ion-label>
+            <ion-input
+              placeholder="Third Party Name"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.third_party_name
+                  ? warrantyClaimsDetails.third_party_name
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Customer Contact</ion-label>
+            <ion-input
+              placeholder="Customer Contact"
+              type="Number"
+              value="{{
+                warrantyClaimsDetails?.customer_contact
+                  ? warrantyClaimsDetails.customer_contact
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Third Party Contact</ion-label>
+            <ion-input
+              placeholder="Third Party Contact"
+              type="Number"
+              value="{{
+                warrantyClaimsDetails?.third_party_contact
+                  ? warrantyClaimsDetails.third_party_contact
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">
+              Customer Contact and Address
+            </ion-label>
+            <ion-input
+              placeholder="Customer Contact and Address"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.customer_address
+                  ? warrantyClaimsDetails.customer_address
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Third Party Address </ion-label>
+            <ion-input
+              placeholder="Third Party Address"
+              type="text"
+              value="{{
+                warrantyClaimsDetails?.third_party_address
+                  ? warrantyClaimsDetails.third_party_address
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>

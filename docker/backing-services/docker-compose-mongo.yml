@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  fix-mongodb-permissions:
+    image: busybox
+    user: root
+    command: chown -R 1001:1001 /bitnami
+    volumes:
+      - mongo-vol:/bitnami
+
+  mongo:
+    image: bitnami/mongodb:4.2.8
+    restart: on-failure
+    environment:
+      - MONGODB_USERNAME=${DB_USER}
+      - MONGODB_PASSWORD=${DB_PASSWORD}
+      - MONGODB_DATABASE=${DB_NAME}
+      - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_PRIMARY_ROOT_USER=root
+      - CACHE_DB=${CACHE_DB_NAME}
+      - CACHE_USER=${CACHE_DB_USER}
+      - CACHE_DB_PASSWORD=${CACHE_DB_PASSWORD}
+      - SERVER_DB=${SERVER_DB_NAME}
+      - SERVER_USER=${SERVER_DB_USER}
+      - SERVER_DB_PASSWORD=${SERVER_DB_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-vol:/bitnami
+      - ./files/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    depends_on:
+      - fix-mongodb-permissions
+
+volumes:
+  mongo-vol:

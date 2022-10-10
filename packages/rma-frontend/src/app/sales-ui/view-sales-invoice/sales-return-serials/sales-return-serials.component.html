@@ -1,0 +1,61 @@
+<ion-fab vertical="top" horizontal="end" slot="fixed" class="ion-margin-end">
+  <ion-fab-button
+    [disabled]="!permissionState.sales_return.create"
+    [routerLink]="['/sales/add-sales-return', invoiceUuid]"
+    class="fab-position"
+  >
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<ion-card>
+  <ion-card-content class="table-container ion-no-padding">
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+
+    <table
+      mat-table
+      class="full-width-table"
+      [dataSource]="dataSource"
+      matSort
+      style="width: 100%"
+    >
+      <!-- No. Column -->
+      <ng-container matColumnDef="row_count">
+        <th mat-header-cell *matHeaderCellDef>No.</th>
+        <td mat-cell *matCellDef="let row; let i = index">
+          {{ paginator.pageIndex * paginator.pageSize + 1 + i }}
+        </td>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+      <!-- Serial No. Column -->
+      <ng-container matColumnDef="serial_no">
+        <th mat-header-cell *matHeaderCellDef>Serial No.</th>
+        <td mat-cell *matCellDef="let row">{{ row.serial_no }}</td>
+      </ng-container>
+
+      <!-- Item Name Column -->
+      <ng-container matColumnDef="item_name">
+        <th mat-header-cell *matHeaderCellDef>Item Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.item_name }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[15, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>

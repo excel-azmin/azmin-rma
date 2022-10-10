@@ -1,0 +1,185 @@
+services:
+  - name: docker:dind
+    alias: docker
+
+variables:
+    RMA_FRONTEND_IMAGE_NAME: excelazmin/rma_frontend
+    RMA_WARRANTY_IMAGE_NAME: excelazmin/rma_warranty
+    RMA_SERVER_IMAGE_NAME: excelazmin/rma_server
+    RMA_POS_IMAGE_NAME: excelazmin/rma_pos
+    IMAGE_TAG: latest
+    PROD_IMAGE_TAG: v0.0.1
+
+stages:
+    - test
+    - build
+    - deploy
+
+# Code Quality, Format & Backend Unit Test   
+
+test_rma_server_image:
+    stage: test
+    image: excelazmin/node-16-headless-chrome:v0.0.1
+    tags:
+        - docker
+    only:
+     changes:
+        - packages/rma-server/**/*
+    cache:
+        paths:
+            - packages/rma-server/node_modules/ 
+    before_script:
+        - cd packages/rma-server
+        - npm install
+    script:
+        # set env variable for test
+        - export NODE_ENV=test
+        # Check Code Quality
+        - npm run lint
+        - npm run format:check
+        # Test backend unit tests
+        - npm run test
+
+test_rma_frontend_image:
+    stage: test
+    image: excelazmin/node-16-headless-chrome:v0.0.1
+    tags:
+        - docker
+    only:
+        changes:
+            - packages/rma-frontend/**/*
+    cache:
+        paths:
+            - packages/rma-frontend/node_modules/
+    
+    before_script:
+        - cd packages/rma-frontend
+        - npm install
+    script:
+        # set env variable for test
+        - export NODE_ENV=test
+        # Check Code Quality
+        - npm run lint
+        - npm run format:check
+        # Test backend unit tests
+        - npm run test
+
+test_rma_warranty_image:
+    stage: test
+    image: excelazmin/node-16-headless-chrome:v0.0.1
+    tags:
+        - docker
+    only:
+     changes:
+        - packages/rma-warranty/**/*
+    cache:
+        paths:
+            - packages/rma-warranty/node_modules/
+    
+    before_script:
+        - cd packages/rma-warranty
+        - npm install
+    script:
+        # set env variable for test
+        - export NODE_ENV=test
+        # Check Code Quality
+        - npm run lint
+        - npm run format:check
+        # Test backend unit tests
+        - npm run test 
+
+test_rma_pos_image:
+    stage: test
+    image: excelazmin/node-16-headless-chrome:v0.0.1
+    tags:
+        - docker
+    only:
+     changes:
+        - packages/rma-pos/**/*
+    cache:
+        paths:
+            - packages/rma-pos/node_modules/
+    
+    before_script:
+        - cd packages/rma-pos
+        - npm install
+    script:
+        # set env variable for test
+        - export NODE_ENV=test
+        # Check Code Quality
+        - npm run lint
+        - npm run format:check
+        # Test backend unit tests
+        - npm run test     
+
+# Code Quality, Format & Backend Unit Test  Completed        
+
+# Start Building Images for Testing 
+
+build_rma_server_image:
+    stage: build
+    image: docker:20.10.17
+    services:
+        - docker:20.10.17-dind
+    only:
+     changes:
+        - packages/rma-server/**/*
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs" 
+    before_script:
+        - docker login -u $USER_NAME -p $USER_PASS
+    script:
+        - docker build -t $RMA_SERVER_IMAGE_NAME:$IMAGE_TAG packages/rma-server
+        - docker push $RMA_SERVER_IMAGE_NAME:$IMAGE_TAG
+
+build_rma_frontend_image:
+    stage: build
+    image: docker:20.10.17
+    services:
+        - docker:20.10.17-dind
+    only:
+     changes:
+        - packages/rma-frontend/**/*
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs" 
+    before_script:
+        - apt-get update && apt-get upgrade -y
+        - docker login -u $USER_NAME -p $USER_PASS
+    script:
+        - docker build -t $RMA_FRONTEND_IMAGE_NAME:$IMAGE_TAG packages/rma-frontend
+        - docker push $RMA_FRONTEND_IMAGE_NAME:$IMAGE_TAG        
+    
+build_rma_warranty_image:
+    stage: build
+    image: docker:20.10.17
+    services:
+        - docker:20.10.17-dind
+    only:
+     changes:
+        - packages/rma-warranty/**/*
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs" 
+    before_script:
+        - docker login -u $USER_NAME -p $USER_PASS
+    script:
+        - docker build -t $RMA_WARRANTY_IMAGE_NAME:$IMAGE_TAG packages/rma-warranty
+        - docker push $RMA_WARRANTY_IMAGE_NAME:$IMAGE_TAG    
+    
+
+build_rma_pos_image:
+    stage: build
+    image: docker:20.10.17
+    services:
+        - docker:20.10.17-dind
+    only:
+     changes:
+        - packages/rma-pos/**/*
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs" 
+    before_script:
+        - docker login -u $USER_NAME -p $USER_PASS
+    script:
+        - docker build -t $RMA_POS_IMAGE_NAME:$IMAGE_TAG packages/rma-pos
+        - docker push $RMA_POS_IMAGE_NAME:$IMAGE_TAG
+
+# Testing Image Building Completed

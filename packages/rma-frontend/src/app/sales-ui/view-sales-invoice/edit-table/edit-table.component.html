@@ -1,0 +1,14 @@
+<form (ngSubmit)="onSubmit()">
+  <div class="mat-subheading-2" class="ion-text-capitalize">Select Serial</div>
+
+  <mat-form-field>
+    <input matInput type="text" name="Serial No" [(ngModel)]="serial_no" />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button mat-button type="submit" color="primary">SAVE</button>
+  </div>
+</form>

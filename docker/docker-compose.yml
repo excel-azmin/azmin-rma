@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  rma-frontend:
+    image: registry.gitlab.com/castlecraft/excel-rma/rma-frontend:latest
+    restart: on-failure
+    environment:
+      - API_HOST=rma-server
+      - API_PORT=8800
+    ports:
+      - "8080:8080"
+    depends_on:
+      - rma-server
+    links:
+      - rma-server
+
+  rma-warranty:
+    image: registry.gitlab.com/castlecraft/excel-rma/rma-warranty:latest
+    restart: on-failure
+    environment:
+      - API_HOST=rma-server
+      - API_PORT=8800
+    ports:
+      - "8080:8080"
+    depends_on:
+      - rma-server
+    links:
+      - rma-server
+
+  rma-server:
+    image: registry.gitlab.com/castlecraft/excel-rma/rma-server:latest
+    restart: on-failure
+    environment:
+      - DB_HOST=mongo
+      - DB_NAME=rma-server
+      - DB_PASSWORD=admin
+      - DB_USER=rma-server
+      - CACHE_DB_NAME=cache-db
+      - CACHE_DB_PASSWORD=admin
+      - CACHE_DB_USER=cache-db
+      - NODE_ENV=production
+    depends_on:
+      - mongo
+    links:
+      - mongo
+
+  fix-mongodb-permissions:
+    image: busybox
+    user: root
+    command: chown -R 1001:1001 /bitnami
+    volumes:
+      - mongo-vol:/bitnami
+
+  mongo:
+    image: bitnami/mongodb:latest
+    restart: on-failure
+    environment:
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - MONGODB_DATABASE=test_rma-server
+      - MONGODB_ROOT_PASSWORD=admin
+      - CACHE_DB=cache-db
+      - CACHE_USER=cache-db
+      - CACHE_DB_PASSWORD=admin
+      - SERVER_DB=rma-server
+      - SERVER_USER=rma-server
+      - SERVER_DB_PASSWORD=admin
+    volumes:
+      - mongo-vol:/bitnami
+      - ./backing-services/files/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    depends_on:
+      - fix-mongodb-permissions
+
+volumes:
+  mongo-vol:

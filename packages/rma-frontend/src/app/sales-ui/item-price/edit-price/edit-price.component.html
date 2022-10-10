@@ -1,0 +1,19 @@
+<form (ngSubmit)="onSubmit()">
+  <div class="mat-subheading-2" class="ion-text-capitalize">{{ column }}</div>
+  <mat-form-field>
+    <input
+      matInput
+      type="number"
+      maxLength="140"
+      name="rate"
+      [(ngModel)]="rate"
+    />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" color="primary" (click)="onCancel()">
+      CANCEL
+    </button>
+    <button mat-button type="submit" color="primary">SAVE</button>
+  </div>
+</form>

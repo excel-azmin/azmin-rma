@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rma-portal.fullname" . }}
+  labels:
+    {{- include "rma-portal.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: RollingUpdate
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rma-portal.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        timestamp: "{{ date "20060102150405" .Release.Time }}"
+      labels:
+        {{- include "rma-portal.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "rma-portal.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-backend
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: "NODE_ENV"
+              value: {{ .Values.nodeEnv }}
+            - name: "DB_HOST"
+              value: {{ .Values.dbHost }}
+            - name: "DB_NAME"
+              value: {{ .Values.dbName }}
+            - name: "DB_USER"
+              value: {{ .Values.dbUser }}
+            - name: "DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key: rmaDbPassword
+                  name: {{ .Release.Name }}-secrets
+            - name: "CACHE_DB_NAME"
+              value: {{ .Values.cacheDbName }}
+            - name: "CACHE_DB_USER"
+              value: {{ .Values.cacheDbUser }}
+            - name: "CACHE_DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key: cacheDbPassword
+                  name: {{ .Release.Name }}-secrets
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 8800
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 8800
+        - name: {{ .Chart.Name }}-frontend
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.frontendImage.repository }}:{{ .Values.frontendImage.tag }}"
+          env:
+            - name: "API_PORT"
+              value: "8800"
+          imagePullPolicy: {{ .Values.frontendImage.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

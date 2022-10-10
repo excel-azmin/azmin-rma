@@ -1,0 +1,74 @@
+<ion-card>
+  <ion-card-content class="table-container ion-no-padding">
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+
+    <table
+      mat-table
+      class="full-width-table"
+      [dataSource]="dataSource"
+      matSort
+      style="width: 100%;"
+    >
+      <!-- CN Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>CN name</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <!-- Posting Date Column -->
+      <ng-container matColumnDef="posting_date">
+        <th mat-header-cell *matHeaderCellDef>Posting Date</th>
+        <td mat-cell *matCellDef="let row">{{ row.posting_date }}</td>
+      </ng-container>
+
+      <!-- Total Column -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef>Amount</th>
+        <td mat-cell *matCellDef="let row">{{ row.total }}</td>
+      </ng-container>
+
+      <!-- Customer Name Column -->
+      <ng-container matColumnDef="customer_name">
+        <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.customer_name }}</td>
+      </ng-container>
+
+      <!-- Created By Column -->
+      <ng-container matColumnDef="owner">
+        <th mat-header-cell *matHeaderCellDef>Created By</th>
+        <td mat-cell *matCellDef="let row">{{ row.owner }}</td>
+      </ng-container>
+
+      <!-- Modified By Column -->
+      <ng-container matColumnDef="modified_by">
+        <th mat-header-cell *matHeaderCellDef>Modified By</th>
+        <td mat-cell *matCellDef="let row">{{ row.modified_by }}</td>
+      </ng-container>
+
+      <!-- Return Against Name Column -->
+      <ng-container matColumnDef="return_against">
+        <th mat-header-cell *matHeaderCellDef>Against SN</th>
+        <td mat-cell *matCellDef="let row">{{ row.return_against }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>

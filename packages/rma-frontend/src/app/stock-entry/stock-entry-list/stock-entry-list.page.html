@@ -1,0 +1,346 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Stock Entry</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Material Transfers </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right">
+          <ion-button
+            [disabled]="!(permissionState.stock_entry.create || 
+            permissionState.stock_entry_receipt.create || 
+            permissionState.stock_entry_issue.create || 
+            permissionState.stock_entry_rnd.create)"
+            color="tertiary"
+            [routerLink]="['/material-transfer']"
+          >
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <ion-card-content class="ion-no-padding">
+      <ion-grid>
+        <form [formGroup]="stockEntryForm">
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  placeholder="Stock ID"
+                  formControlName="names"
+                  (keyup.enter)="setFilter()"
+                />
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <mat-label>Status</mat-label>
+                <mat-select
+                  formControlName="status"
+                  (selectionChange)="statusChange($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let status of invoiceStatus"
+                    [value]="status"
+                  >
+                    {{status}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  placeholder="From Warehouse"
+                  [matAutocomplete]="from_warehouse"
+                  formControlName="from_warehouse"
+                  (focusout)="validateInput(f.from_warehouse, filteredFromWarehouseList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #from_warehouse="matAutocomplete"
+                  (optionSelected)="fromWarehouseChange($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let from_warehouse of filteredFromWarehouseList | async"
+                    [value]="from_warehouse"
+                  >
+                    {{from_warehouse}}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.from_warehouse.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.from_warehouse.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  placeholder="To Warehouse"
+                  [matAutocomplete]="to_warehouse"
+                  formControlName="to_warehouse"
+                  (focusout)="validateInput(f.to_warehouse, filteredToWarehouseList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #to_warehouse="matAutocomplete"
+                  (optionSelected)="toWarehouseChange($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let to_warehouse of filteredToWarehouseList | async"
+                    [value]="to_warehouse"
+                  >
+                    {{to_warehouse}}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.to_warehouse.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.to_warehouse.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <mat-label>Stock Entry Type</mat-label>
+                <mat-select
+                  formControlName="status"
+                  (selectionChange)="setStockEntryType($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let type of stockEntryType"
+                    [value]="type"
+                  >
+                    {{type}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-text color="medium" class="date-filter-text">
+                Range Date
+              </ion-text>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="fromDate"
+                  placeholder="From Date"
+                  readonly
+                  formControlName="fromDateFormControl"
+                  (dateChange)="dateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="fromDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #fromDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="toDate"
+                  placeholder="To Date"
+                  readonly
+                  formControlName="toDateFormControl"
+                  (dateChange)="dateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="toDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #toDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+            </ion-col>
+            <ion-col class="ion-text-center">
+              <ion-text color="medium" class="date-filter-text">
+                Single Date
+              </ion-text>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="singleDate"
+                  placeholder="Select Date"
+                  readonly
+                  formControlName="singleDateFormControl"
+                  (dateChange)="singleDateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="singleDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #singleDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+              <ion-button
+                color="tertiary"
+                (click)="clearFilters()"
+                fill="outline"
+              >
+                Clear
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </form>
+      </ion-grid>
+      <div class="example-container mat-elevation-z8">
+        <mat-table
+          class="full-width-table"
+          [dataSource]="dataSource"
+          matSort
+          (matSortChange)="setFilter($event)"
+        >
+          <ng-container matColumnDef="sr_no">
+            <mat-header-cell *matHeaderCellDef>No. </mat-header-cell>
+            <mat-cell *matCellDef="let row;let i=index ">
+              {{ paginator.pageIndex * paginator.pageSize + 1 + i }}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="createdByEmail">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="name">
+              Created By
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.createdByEmail}} </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="status"
+              >Status</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">
+              <ion-text
+                [ngStyle]="{'color': (row.status === 'Delivered') ? 'green' : ['Returned','Reseted'].includes(row.status) ? 'red' : 'blue' }"
+              >
+                {{row.status}}
+              </ion-text>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="posting_date">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="created_on">
+              Posting Date
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{row.posting_date | date: 'd MMM, y'}}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="stockEntryType">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="stockEntryType">
+              Type
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{row.stock_entry_type}}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+          
+          <ng-container matColumnDef="createdBy">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="supplier">
+              Created By
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.createdBy}} </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="remarks">
+            <mat-header-cell *matHeaderCellDef> Remarks </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{ row.remarks }} </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="territory">
+            <mat-header-cell *matHeaderCellDef> Territory </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{ row.territory }} </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="posting_time">
+            <mat-header-cell *matHeaderCellDef> Posting Time </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{ row.posting_time }} </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <a [routerLink]="['/material-transfer/',row.uuid]" >{{ row.stock_id }}</a>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="s_warehouse">
+            <mat-header-cell *matHeaderCellDef>
+              From Warehouse
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{ ['Material Receipt'].includes(row.stock_entry_type) ?  '' : row?.items[0]?.s_warehouse  }}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="t_warehouse">
+            <mat-header-cell *matHeaderCellDef> To Warehouse </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              {{ !['Material Receipt','Material Transfer'].includes(row.stock_entry_type) ? '' : row?.items[0]?.t_warehouse  }}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <mat-header-row
+            *matHeaderRowDef="displayedColumns; sticky: true"
+          ></mat-header-row>
+          <mat-row
+            *matRowDef="let row; columns: displayedColumns;"
+          >
+          </mat-row>
+          <mat-footer-row
+            class="footer"
+            *matFooterRowDef="displayedColumns; sticky: true"
+          ></mat-footer-row>
+        </mat-table>
+      </div>
+      <mat-card-actions>
+        <mat-paginator
+          #paginator
+          class="mat-paginator-sticky"
+          (page)="getUpdate($event)"
+          [length]="dataSource.length"
+          [pageSizeOptions]="[30, 50, 100, 500]"
+        >
+        </mat-paginator>
+      </mat-card-actions>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

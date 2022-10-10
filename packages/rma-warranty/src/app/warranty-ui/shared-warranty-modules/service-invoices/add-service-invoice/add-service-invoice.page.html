@@ -1,0 +1,358 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Service Invoice</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="page-background">
+  <ion-fab
+    *ngIf="permissionState.service_invoice.create"
+    class="ion-margin-end"
+    slot="fixed"
+    vertical="top"
+    color="light"
+    horizontal="end"
+  >
+    <ion-fab-button
+      class="fab-position"
+      [disabled]="serviceInvoiceForm.invalid"
+      (click)="createInvoice()"
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <form [formGroup]="serviceInvoiceForm">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title color="tertiary"> Details </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="i-no-padding">
+          <ion-row class="align">
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  [matDatepicker]="posting_date"
+                  placeholder="Posting Date"
+                  formControlName="posting_date"
+                  (dateChange)="selectedPostingDate($event)"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="posting_date"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #posting_date disabled="false"></mat-datepicker>
+                <mat-error *ngIf="f.posting_date.hasError('required')">
+                  Posting Date is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  type="text"
+                  placeholder="Customer Name"
+                  formControlName="customer_name"
+                  [matAutocomplete]="customer"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #customer="matAutocomplete"
+                  [displayWith]="getCustOption"
+                  (optionSelected)="customerChanged($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredCustomerList | async"
+                    [value]="option"
+                  >
+                    {{ option.customer_name }}
+                    <small>({{ option.name }})</small>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.customer_name.hasError('required')">
+                  Customer Name is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row class="align">
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  placeholder="Customer Address"
+                  formControlName="customer_address"
+                  [matAutocomplete]="address"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #address="matAutocomplete"
+                  [displayWith]="getNameOption"
+                  (optionSelected)="getOption($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of addressList | async"
+                    [value]="option"
+                  >
+                    {{ option.name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.customer_address.hasError('required')">
+                  Customer Address is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  placeholder="Customer Contact"
+                  formControlName="customer_contact"
+                  [matAutocomplete]="contact"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #contact="matAutocomplete"
+                  [displayWith]="getNameOption"
+                >
+                  <mat-option
+                    *ngFor="let option of customerContactList | async"
+                    [value]="option"
+                  >
+                    {{ option.name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.customer_contact.hasError('required')">
+                  Customer Contact is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row class="align">
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  placeholder="Account"
+                  formControlName="account"
+                  [matAutocomplete]="account"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #account="matAutocomplete"
+                  [displayWith]="getNameOption"
+                  (optionSelected)="getOption($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of accountList |async "
+                    [value]="option"
+                  >
+                    {{ option.name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.account.hasError('required')">
+                  Account is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  matInput
+                  placeholder="Branch"
+                  formControlName="branch"
+                  [matAutocomplete]="deliveryBranch"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #deliveryBranch="matAutocomplete"
+                  [displayWith]="getOption"
+                >
+                  <mat-option
+                    *ngFor="let option of territoryList"
+                    [value]="option"
+                  >
+                    {{ option}}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.branch.hasError('required')">
+                  Branch is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row class="align">
+            <ion-col>
+              <mat-checkbox formControlName="is_pos"> Paid </mat-checkbox>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Items </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right" size="auto">
+          <ion-button
+            color="tertiary"
+            fill="outline"
+            matTooltip=" ( ctrl + i ) "
+            matTooltipPosition="above"
+            matTooltipClass="tooltip"
+            (ctrlI)="addItem()"
+            (click)="addItem()"
+          >
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <ion-item lines="none">
+        <mat-table #table [dataSource]="dataSource" style="width: 100%">
+          <ng-container matColumnDef="item_group">
+            <mat-header-cell *matHeaderCellDef>Item Group</mat-header-cell>
+            <mat-cell *matCellDef="let row;let i = index">
+              <ng-container *ngIf="row.item_group">
+                {{row.item_group}}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.item_group">
+                Add an item Group
+              </span>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+          <ng-container matColumnDef="item_name">
+            <mat-header-cell *matHeaderCellDef>Item</mat-header-cell>
+            <mat-cell
+              *matCellDef="let row;let i = index"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container *ngIf="row.item_name">
+                {{row.item_name}}
+              </ng-container>
+              <span class="add-comment" *ngIf="!row.item_name">
+                Add an item
+              </span>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateItem(row,i,$event)"
+              >
+                <inline-edit
+                  style="width: 400px !important"
+                  [value]="row.item_name"
+                  column="item"
+                  [minimumPrice]="row.minimumPrice"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+          <ng-container matColumnDef="quantity">
+            <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+            <mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container> {{row.qty}} </ng-container>
+
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateQuantity(row, $event)"
+              >
+                <inline-edit
+                  [value]="row.qty"
+                  column="quantity"
+                  [minimumPrice]="row.minimumPrice"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container>
+          <ng-container matColumnDef="rate">
+            <mat-header-cell *matHeaderCellDef>Rate</mat-header-cell>
+            <mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ng-container> {{row.rate}} </ng-container>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateRate(row, $event)"
+              >
+                <inline-edit
+                  [value]="row.rate"
+                  column="rate"
+                  [minimumPrice]="row.minimumPrice"
+                ></inline-edit>
+              </sat-popover>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef>Total </mat-footer-cell>
+          </ng-container>
+          <ng-container matColumnDef="total">
+            <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+            <mat-cell *matCellDef="let row"
+              >{{row.rate * row.qty | curFormat | async}}</mat-cell
+            >
+            <mat-footer-cell *matFooterCellDef
+              >{{f.total.value | curFormat | async }}</mat-footer-cell
+            >
+          </ng-container>
+          <ng-container matColumnDef="delete">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row ; let i = index">
+              <ion-button
+                (click)="deleteRow(i)"
+                fill="clear"
+                class="ion-no-padding"
+                color="danger"
+              >
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-button>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+          <mat-header-row
+            *matHeaderRowDef="displayedColumns; sticky: true"
+          ></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          <mat-footer-row
+            class="footer"
+            *matFooterRowDef="displayedColumns; sticky: true"
+          ></mat-footer-row>
+        </mat-table>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

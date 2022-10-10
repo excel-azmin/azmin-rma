@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Home
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="loggedIn && !spinner">
+  <ion-card class="welcome-card">
+    <ion-item *ngIf="picture">
+      <ion-avatar>
+        <img src="{{ picture }}" alt="" />
+      </ion-avatar>
+    </ion-item>
+    <ion-card-header>
+      <ion-card-subtitle>{{ email }}</ion-card-subtitle>
+      <ion-card-title>Welcome {{ fullName }}!</ion-card-title>
+    </ion-card-header>
+  </ion-card>
+</ion-content>
+
+<ion-content *ngIf="!loggedIn && !spinner" class="card">
+  <ion-grid style="height: 100%">
+    <ion-row
+      class="ion-justify-content-center ion-align-items-center"
+      style="height: 100%"
+    >
+      <ion-icon name="log-in"></ion-icon>&nbsp;Please Login to continue
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-content *ngIf="spinner">
+  <ion-grid style="height: 100%">
+    <ion-row
+      class="ion-justify-content-center ion-align-items-center"
+      style="height: 100%"
+    >
+      <ion-spinner></ion-spinner>
+    </ion-row>
+  </ion-grid>
+</ion-content>

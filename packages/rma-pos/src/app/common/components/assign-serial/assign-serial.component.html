@@ -1,0 +1,40 @@
+<ion-card *ngIf="remaining > 0">
+    <ion-card-content>
+        <ion-grid class="ion-no-padding">
+            <ion-row class="align">
+                <ion-col class="ion-text-left">
+                    <input #csvFileInput type="file" id="txtFileUpload" (change)="fileChangedEvent($event)" accept=".csv" />
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="remaining > 0">
+    <ion-card-header>
+        <ion-card-title>
+            <ion-text color="tertiary">
+                Serial Range
+            </ion-text>
+        </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+        <ion-grid class="ion-no-padding">
+            <ion-row>
+                <ion-col>
+                    <mat-form-field class="example-full-width">
+                        <input matInput oninput="this.value = this.value.toUpperCase()" placeholder="From Range" type="text" name="From Range" [(ngModel)]="rangePickerState.fromRange" (ngModelChange)="this.fromRangeUpdate.next($event)" required />
+                    </mat-form-field>
+                    <mat-form-field class="example-full-width">
+                        <input type="text" oninput="this.value = this.value.toUpperCase()" matInput placeholder="To Range" type="string" name="To Range" [(ngModel)]="rangePickerState.toRange" (ngModelChange)="this.toRangeUpdate.next($event)" />
+                    </mat-form-field>
+                </ion-col>
+                <ion-col>
+                    <ion-text color="primary">
+                        <h3>Total : {{ rangePickerState.serials.length }}</h3>
+                    </ion-text>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-card-content>
+</ion-card>

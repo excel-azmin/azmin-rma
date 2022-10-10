@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  mongodb:
+    image: bitnami/mongodb:latest
+    restart: on-failure
+    environment:
+      - MONGODB_ROOT_PASSWORD=admin
+      - MONGODB_DATABASE=rma-server
+      - MONGODB_USERNAME=rma-server
+      - MONGODB_PASSWORD=admin
+    volumes:
+      - excel-mongo:/bitnami
+    depends_on:
+      - fix-mongodb-permissions
+
+  fix-mongodb-permissions:
+    image: bitnami/mongodb:latest
+    user: root
+    command: chown -R 1001:1001 /bitnami
+    volumes:
+      - excel-mongo:/bitnami    
+
+  mongodb-configuration:
+    image: bitnami/mongodb:latest
+    environment:
+      - MONGODB_ROOT_PASSWORD=admin
+    command:
+      - bash
+      - -c
+      - >
+        sleep 10;
+        mongo cache-db \
+          --host mongodb \
+          --port 27017 \
+          -u root \
+          -p $$MONGODB_ROOT_PASSWORD \
+          --authenticationDatabase admin \
+          --eval "db.createUser({user: 'cache-db', pwd: 'admin', roles:[{role:'dbOwner', db: 'cache-db'}]});";
+
+  development:
+    build: .
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    ports:
+      - '8800:8800'
+      - '4700:4700'
+      - '4800:4800'
+      - '4900:4900'
+    extra_hosts:
+      - excel.localhost:172.17.0.1
+
+volumes:
+  excel-mongo:

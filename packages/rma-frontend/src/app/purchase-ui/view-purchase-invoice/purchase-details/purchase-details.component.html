@@ -1,0 +1,193 @@
+
+<ion-fab
+vertical="top"
+horizontal="end"
+slot="fixed"
+*ngIf="!['Canceled','Reseted'].includes(purchaseInvoiceDetails.status)"
+class="ion-margin-end"
+>
+<ion-fab-button
+  color="danger"
+  class="fab-position"
+  (click)="resetInvoice()"
+>
+  <ion-icon name="close-outline"></ion-icon>
+</ion-fab-button>
+</ion-fab>
+
+<ion-card>
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Supplier</ion-label>
+            <ion-input
+              placeholder="Supplier"
+              readonly="true"
+              type="string"
+              value="{{
+                purchaseInvoiceDetails?.supplier
+                  ? purchaseInvoiceDetails.supplier
+                  : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item
+            lines="none"
+            [href]="viewPurchaseInvoiceUrl"
+            target="_blank"
+          >
+            <ion-label position="floating">Purchase Invoice Number</ion-label>
+            <ion-input
+              [value]="purchaseInvoiceDetails?.name"
+              readonly="true"
+              type="string"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Posting Date</ion-label>
+            <ion-datetime
+              readonly
+              placeholder="Posting Date"
+              display-format="DD-MM-YYYY"
+              value="{{
+                purchaseInvoiceDetails?.posting_date
+                  ? purchaseInvoiceDetails.posting_date
+                  : ''
+              }}"
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Warehouse</ion-label>
+            <ion-input
+              readonly="true"
+              type="text"
+              value="{{
+                purchaseInvoiceDetails.items
+                  ? (purchaseInvoiceDetails?.items)[0]?.warehouse
+                  : 'Please assign serial to see warehouse'
+              }}"
+              placeholder="Warehouse"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Status</ion-label>
+            <ion-input
+              readonly="true"
+              type="text"
+              value="{{ purchaseInvoiceDetails?.status }}"
+              placeholder="Status"
+              [ngStyle]="{
+                color: ['Submitted','To Deliver'].includes(purchaseInvoiceDetails?.status) ? '#4d2500' : 
+                ['Completed'].includes(purchaseInvoiceDetails?.status) ? 'green' :
+                'red'
+              }"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item
+            lines="none"
+            [href]="viewPurchaseOrderUrl"
+            target="_blank"
+          >
+            <ion-label position="floating">Purchase Order Number</ion-label>
+            <ion-input
+              [value]="purchaseOrderName"
+              readonly="true"
+              type="string"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Items
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+  <ion-card-content class="ion-no-padding">
+    <mat-table #table [dataSource]="dataSource" style="width: 100%;">
+      <ng-container matColumnDef="item_group">
+        <mat-header-cell *matHeaderCellDef>Item Group</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container *ngIf="row.name">
+            {{ row.item_group }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="item_name">
+        <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.item_name }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef>Total :</mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="qty">
+        <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.qty }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef>{{ total_qty }}</mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="rate">
+        <mat-header-cell *matHeaderCellDef>Rate</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.rate | curFormat | async }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          {{ row.rate * row.qty | curFormat | async }}
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef>
+          {{ total | curFormat | async }}
+        </mat-footer-cell>
+      </ng-container>
+
+      <mat-header-row
+        *matHeaderRowDef="displayedColumns; sticky: true"
+      ></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      <mat-footer-row
+        class="footer"
+        *matFooterRowDef="displayedColumns; sticky: true"
+      ></mat-footer-row>
+    </mat-table>
+  </ion-card-content>
+</ion-card>

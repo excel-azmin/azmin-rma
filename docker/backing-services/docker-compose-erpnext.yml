@@ -1,0 +1,124 @@
+version: '3'
+
+services:
+  redis-cache:
+    image: redis:latest
+    restart: on-failure
+    volumes:
+      - redis-cache-vol:/data
+
+  redis-queue:
+    image: redis:latest
+    restart: on-failure
+    volumes:
+      - redis-queue-vol:/data
+
+  redis-socketio:
+    image: redis:latest
+    restart: on-failure
+    volumes:
+      - redis-socketio-vol:/data
+
+  mariadb:
+    image: mariadb:10.3
+    restart: on-failure
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=erpnext
+      - MYSQL_USER=erpnext
+      - MYSQL_PASSWORD=erpnext
+    volumes:
+      - ./files/frappe-mariadb.cnf:/etc/mysql/conf.d/frappe.cnf
+      - ./files/20200529_010128-erpnext_localhost-database.sql.gz:/docker-entrypoint-initdb.d/database.sql.gz
+      - mariadb-vol:/var/lib/mysql
+
+  localizer:
+    image: registry.gitlab.com/castlecraft/docker-craft/localizer:latest
+    environment:
+      - API_PORT=8800
+    restart: on-failure
+
+  erpnext-nginx:
+    image: frappe/erpnext-nginx:${VERSION}
+    restart: on-failure
+    environment:
+      - FRAPPE_PY=erpnext-python
+      - FRAPPE_PY_PORT=8000
+      - FRAPPE_SOCKETIO=frappe-socketio
+      - SOCKETIO_PORT=9000
+    ports:
+      - "80:80"
+    volumes:
+      - sites-vol:/var/www/html/sites:rw
+      - assets-vol:/assets:rw
+
+  erpnext-python:
+    image: frappe/erpnext-worker:${VERSION}
+    restart: on-failure
+    environment:
+      - MARIADB_HOST=${MARIADB_HOST}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SOCKETIO_PORT=9000
+      - AUTO_MIGRATE=1
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - assets-vol:/home/frappe/frappe-bench/sites/assets:rw
+
+  frappe-socketio:
+    image: frappe/frappe-socketio:${VERSION}
+    restart: on-failure
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+
+  erpnext-worker-default:
+    image: frappe/erpnext-worker:${VERSION}
+    restart: on-failure
+    command: worker
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+
+  erpnext-worker-short:
+    image: frappe/erpnext-worker:${VERSION}
+    restart: on-failure
+    command: worker
+    environment:
+      - WORKER_TYPE=short
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+
+  erpnext-worker-long:
+    image: frappe/erpnext-worker:${VERSION}
+    restart: on-failure
+    command: worker
+    environment:
+      - WORKER_TYPE=long
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+
+  erpnext-schedule:
+    image: frappe/erpnext-worker:${VERSION}
+    restart: on-failure
+    command: schedule
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+
+  bootstrap-data:
+    image: frappe/erpnext-worker:${VERSION}
+    volumes:
+      - ./files/bootstrap.py:/opt/scripts/bootstrap.py
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+    user: "frappe"
+    entrypoint: "/home/frappe/frappe-bench/env/bin/python"
+    command: "/opt/scripts/bootstrap.py"
+    depends_on:
+      - erpnext-nginx
+
+volumes:
+  mariadb-vol:
+  redis-cache-vol:
+  redis-queue-vol:
+  redis-socketio-vol:
+  assets-vol:
+  sites-vol:

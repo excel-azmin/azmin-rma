@@ -1,0 +1,24 @@
+.quasar
+.DS_Store
+.thumbs.db
+*/node_modules
+/dist
+/public
+/src-cordova/platforms
+/src-cordova/plugins
+/src-cordova/www
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# lerna
+lerna-debug.log

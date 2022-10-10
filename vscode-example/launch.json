@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "rma-frontend",
+            "url": "http://rma.localhost:4700",
+            "runtimeExecutable": "/usr/bin/chromium",
+            "runtimeArgs": ["--remote-debugging-port=9222", "--user-data-dir=/tmp/rma-frontend"],
+            "webRoot": "${workspaceFolder}/packages/rma-frontend",
+            "sourceMapPathOverrides": {
+                "webpack:/*": "${webRoot}/*",
+                "/./*": "${webRoot}/*",
+                "/src/*": "${webRoot}/*",
+                "/*": "*",
+                "/./~/*": "${webRoot}/node_modules/*"
+            },
+            "windows": {
+                "runtimeExecutable": "c:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "rma-warranty",
+            "url": "http://warranty.localhost:4800",
+            "runtimeExecutable": "/usr/bin/chromium",
+            "runtimeArgs": ["--remote-debugging-port=9222", "--user-data-dir=/tmp/rma-warranty"],
+            "webRoot": "${workspaceFolder}/packages/rma-warranty",
+            "sourceMapPathOverrides": {
+                "webpack:/*": "${webRoot}/*",
+                "/./*": "${webRoot}/*",
+                "/src/*": "${webRoot}/*",
+                "/*": "*",
+                "/./~/*": "${webRoot}/node_modules/*"
+            },
+            "windows": {
+                "runtimeExecutable": "c:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+            }
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "rma-server",
+            "port": 9229
+        }
+    ]
+}

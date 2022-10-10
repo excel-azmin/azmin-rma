@@ -1,0 +1,12 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "cypress": "cypress",
+    "version": "lerna clean --yes && lerna bootstrap --ignore-scripts -- --package-lock-only --no-audit && git add ."
+  },
+  "devDependencies": {
+    "cypress": "^6.2.1",
+    "lerna": "^3.22.1"
+  }
+}

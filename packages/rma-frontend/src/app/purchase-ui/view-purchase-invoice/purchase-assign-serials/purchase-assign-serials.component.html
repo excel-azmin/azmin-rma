@@ -1,0 +1,202 @@
+<ion-fab *ngIf="remaining > 0 && permissionState.purchase_receipt.create" vertical="top" horizontal="end" slot="fixed" class="ion-margin-end">
+    <ion-fab-button class="fab-position" (click)="submitPurchaseReceipt()">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+    </ion-fab-button>
+</ion-fab>
+<ion-card *ngIf="remaining > 0">
+    <ion-card-content>
+        <ion-grid class="ion-no-padding">
+            <ion-row class="align">
+                <ion-col>
+                    <mat-form-field class="example-full-width transform">
+                        <input matInput placeholder="Select Warehouse"
+                            [formControl]="warehouseFormControl"
+                            type="text"
+                            (focusout)="validateInput(warehouseFormControl, filteredWarehouseList)" 
+                            [matAutocomplete]="auto" required />
+                        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="getOptionText">
+                            <mat-option *ngFor="let option of filteredWarehouseList | async" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="warehouseFormControl.hasError('falseValse')">
+                            You should select a value from dropdown only.
+                            <strong>'{{ warehouseFormControl.value }}'</strong> is not allowed.
+                        </mat-error>
+                        <mat-error *ngIf="warehouseFormControl.hasError('required')">
+                            Warehouse is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </ion-col>
+                <ion-col>
+                    <mat-form-field class="example-full-width transform">
+                        <input matInput [matDatepicker]="purchaseReceiptDate" [formControl]="date" placeholder="Date" readonly (dateChange)="selectedPurchaseReceiptDate($event)" />
+                        <mat-datepicker-toggle matSuffix [for]="purchaseReceiptDate"></mat-datepicker-toggle>
+                        <mat-datepicker #purchaseReceiptDate disabled="false"></mat-datepicker>
+                        <mat-error *ngIf="date.hasError('required')">
+                            Date is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-card-content>
+</ion-card>
+<app-assign-serial *ngIf="remaining > 0" [state]="state" [rangePickerState]="rangePickerState" (sendPickerState)="assignPickerState($event)" (sendCSVJSON)="addSerialsFromCsvJson($event)"></app-assign-serial>
+<ion-card *ngIf="remaining > 0">
+    <ion-card-header>
+        <ion-card-title>
+            <ion-text color="tertiary">
+                Products
+            </ion-text>
+        </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+        <mat-table #table [dataSource]="itemDataSource" style="width: 100%;">
+            <ng-container matColumnDef="purchaseWarrantyMonths">
+                <mat-header-cell *matHeaderCellDef>Warranty In Months</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.purchaseWarrantyMonths }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="item_name">
+                <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.item_name }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="qty">
+                <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.qty }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="assigned">
+                <mat-header-cell *matHeaderCellDef>Assigned</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.assigned || 0 }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="remaining">
+                <mat-header-cell *matHeaderCellDef>Remaining</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    {{ row.remaining || 0 }}
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="has_serial_no">
+                <mat-header-cell *matHeaderCellDef>Has Serial</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <mat-checkbox class="example-margin" [(ngModel)]="row.has_serial_no" [disabled]="true">
+                    </mat-checkbox>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="add_serial">
+                <mat-header-cell *matHeaderCellDef>Add Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ion-button [disabled]="row.remaining === 0" fill="outline" (click)="assignSerial(row)">
+                        <ion-icon name="Add"></ion-icon>
+                    </ion-button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="itemDisplayedColumns; sticky: true"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: itemDisplayedColumns"></mat-row>
+        </mat-table>
+    </ion-card-content>
+</ion-card>
+<ion-card *ngIf="remaining > 0">
+    <ion-card-header>
+        <ion-card-title>
+            <ion-text color="tertiary">
+                Serials
+            </ion-text>
+        </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+        <mat-table #table [dataSource]="serialDataSource" style="width: 100%;">
+            <ng-container matColumnDef="item_code">
+                <mat-header-cell *matHeaderCellDef>Item Code</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.item_code }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="item_name">
+                <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.item_name }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="qty">
+                <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.qty }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="warranty_date">
+                <mat-header-cell *matHeaderCellDef>Warranty Date</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <input matInput [(ngModel)]="row.warranty_date" [matDatepicker]="warranty_date" disabled />
+                    <mat-datepicker-toggle matSuffix [for]="warranty_date"></mat-datepicker-toggle>
+                    <mat-datepicker #warranty_date disabled="false"></mat-datepicker>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="serial_no">
+                <mat-header-cell *matHeaderCellDef>Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <input matInput oninput="this.value = this.value.toUpperCase()" *ngIf="!row.serial_no[1]" [disabled]="row.serial_no[0] === 'Non Serial Item' ? true : false" [(ngModel)]="row.serial_no[0]" />
+                    <p *ngIf="row.serial_no.length === 1 ? false : true">
+                        {{ getSerialsInputValue(row) }}
+                    </p>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="delete">
+                <mat-header-cell *matHeaderCellDef>Delete Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row; let i = index">
+                    <ion-button color="danger" fill="clear" (click)="deleteRow(row, i)">
+                        <ion-icon name="trash"></ion-icon>
+                    </ion-button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="serialDisplayedColumns; sticky: true"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: serialDisplayedColumns; let i = index"></mat-row>
+        </mat-table>
+    </ion-card-content>
+</ion-card>
+
+<ion-grid class="ion-no-padding" *ngIf="purchaseInvoiceDetails && remaining === 0">
+    <ion-row>
+        <ion-col class="ion-text-center">
+            <ion-text style="color: black;">
+                <h1>All serial already assigned</h1>
+            </ion-text>
+        </ion-col>
+    </ion-row>
+</ion-grid>
+
+<app-delivered-serials *ngIf="purchaseInvoiceDetails && displayDeliveredSerialsTable"  [deliveredSerialsState]="deliveredSerialsState"></app-delivered-serials>

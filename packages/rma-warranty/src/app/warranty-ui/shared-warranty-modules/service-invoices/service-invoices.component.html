@@ -1,0 +1,185 @@
+<ion-card>
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary"> Service Invoice </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right">
+          <ion-button
+            color="tertiary"
+            (click)="syncDataWithERP()"
+            fill="outline"
+          >
+            Sync Data
+          </ion-button>
+
+          <ion-button
+            *ngIf="permissionState.service_invoice.create"
+            color="tertiary"
+            [routerLink]="['/warranty/service-invoice', 'add', invoiceUuid]"
+          >
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+
+  <ion-card-content class="ion-no-padding">
+    <div *ngIf="!permissionState.service_invoice.read">
+      Requires permission to access document.
+    </div>
+    <div
+      *ngIf="permissionState.service_invoice.read"
+      class="example-container mat-elevation-z8"
+    >
+      <mat-table #table [dataSource]="dataSource">
+        <ng-container matColumnDef="invoice_no">
+          <mat-header-cell *matHeaderCellDef>Invoice No</mat-header-cell>
+          <mat-cell *matCellDef="let row" (click)="openERPServiceInvoice(row)">
+            <ng-container *ngIf="row.invoice_no">
+              {{ row.invoice_no }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.status }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.posting_date }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="customer_third_party">
+          <mat-header-cell *matHeaderCellDef>Customer Party</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.customer_third_party }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef>Total</mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="outstanding_amount">
+          <mat-header-cell *matHeaderCellDef
+            >Outstanding Amount</mat-header-cell
+          >
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.outstanding_amount }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="invoice_amount">
+          <mat-header-cell *matHeaderCellDef>Invoice Amount</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.total }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef>{{
+            total | curFormat | async
+          }}</mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="claim_no">
+          <mat-header-cell *matHeaderCellDef>Claim No</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ warrantyObject?.claim_no }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="remarks">
+          <mat-header-cell *matHeaderCellDef>Remarks</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.remarks }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="branch">
+          <mat-header-cell *matHeaderCellDef>Branch</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.branch }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="created_by">
+          <mat-header-cell *matHeaderCellDef>Created by</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.created_by }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="submitted_by">
+          <mat-header-cell *matHeaderCellDef>Submitted by</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.created_by }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="submit">
+          <mat-header-cell *matHeaderCellDef>Submit</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <ion-text
+              [ngStyle]="{
+                color: row.docstatus === 1 ? '#4d2500' : 'red'
+              }"
+            >
+              {{
+                row.docstatus === 0
+                  ? 'Draft'
+                  : row.docstatus === 1
+                  ? 'Submitted'
+                  : 'Canceled'
+              }}
+            </ion-text>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        <mat-footer-row
+          class="footer"
+          *matFooterRowDef="displayedColumns; sticky: true"
+        ></mat-footer-row>
+      </mat-table>
+    </div>
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>

@@ -1,0 +1,38 @@
+<form [formGroup]="printForm">
+  <mat-form-field style="width: 100%">
+    <input
+      matInput
+      placeholder="Print Format"
+      [matAutocomplete]="printFormat"
+      formControlName="printFormat"
+      (focusout)="validateInput(formControls.printFormat, printFormatList)"
+    />
+    <mat-autocomplete
+      autoActiveFirstOption
+      #printFormat="matAutocomplete"
+      [displayWith]="getPrintFormatOption"
+    >
+      <mat-option
+        *ngFor="let option of printFormatList | async"
+        [value]="option"
+      >
+        {{ option.name }}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-error *ngIf="formControls.printFormat.hasError('falseValse')">
+      You should select a value from dropdown only.
+      <strong>'{{formControls.printFormat.value}}'</strong> is not allowed.
+    </mat-error>
+  </mat-form-field>
+</form>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button
+    mat-button
+    (click)="printDocument()"
+    [disabled]="printForm.invalid"
+    cdkFocusInitial
+  >
+    Print
+  </button>
+</div>

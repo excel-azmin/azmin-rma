@@ -1,0 +1,18 @@
+.welcome-card img {
+  max-height: 35vh;
+  overflow: hidden;
+}
+
+.panel-container {
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  margin: 10px;
+}
+
+.panel {
+  width:49%;
+  margin: 10px 0;
+  height: max-content;
+}

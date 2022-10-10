@@ -1,0 +1,358 @@
+<ion-card>
+  <ion-card-content class="table-container ion-no-padding">
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <div class="search-models">
+      <mat-form-field class="full-width">
+        <input
+          matInput
+          placeholder="Search"
+          [(ngModel)]="search"
+          (keyup.enter)="setFilter()"
+        />
+        <button mat-button matSuffix (click)="setFilter()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <table
+      mat-table
+      class="full-width-table"
+      [dataSource]="dataSource"
+      matSort
+      style="width: 100%;"
+    >
+      <!-- serial_no Column -->
+      <ng-container matColumnDef="serial_no">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          (click)="setFilter()"
+        >
+          serial_no
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.serial_no }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="item_code">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          (click)="setFilter()"
+        >
+          item_code
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.item_code }}
+        </td>
+      </ng-container>
+
+      <!-- UUID Column -->
+      <ng-container matColumnDef="uuid">
+        <th mat-header-cell *matHeaderCellDef>UUID</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.uuid }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        (click)="selectedSerialNo(row)"
+      ></tr>
+    </table>
+
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="selected_serial_no.serial_no != ''">
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Valid Warranty
+            </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Customer Name"
+              readonly
+              [(ngModel)]="selected_serial_no.customer_name"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Item Name"
+              readonly
+              [(ngModel)]="selected_serial_no.item_name"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="serial_no"
+              readonly
+              [(ngModel)]="selected_serial_no.serial_no"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="item_code"
+              readonly
+              [(ngModel)]="selected_serial_no.item_code"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="delivery time"
+              readonly
+              [(ngModel)]="selected_serial_no.delivery_time"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col> </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <ion-button color="tertiary" fill="outline">
+            Solve
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Solve with spares
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Replace
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="selected_serial_no.serial_no != ''">
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Void Warranty
+            </ion-text>
+          </ion-card-title></ion-col
+        >
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Customer Name"
+              readonly
+              [(ngModel)]="selected_serial_no.customer_name"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Item Name"
+              readonly
+              [(ngModel)]="selected_serial_no.item_name"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Serial no"
+              readonly
+              [(ngModel)]="selected_serial_no.serial_no"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Item Code"
+              readonly
+              [(ngModel)]="selected_serial_no.item_code"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Delivery Time"
+              readonly
+              [(ngModel)]="selected_serial_no.delivery_time"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col> </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <ion-button color="tertiary" fill="outline">
+            Solve
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Solve with spares
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Upgrade Sales
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="selected_serial_no.serial_no != ''">
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Third party Warranty
+            </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Customer Name"
+              readonly
+              [(ngModel)]="selected_serial_no.customer_name"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Item Name"
+              readonly
+              [(ngModel)]="selected_serial_no.item_name"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Serial no"
+              readonly
+              [(ngModel)]="selected_serial_no.serial_no"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Item Code"
+              readonly
+              [(ngModel)]="selected_serial_no.item_code"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              placeholder="Delivery Time"
+              readonly
+              [(ngModel)]="selected_serial_no.delivery_time"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col> </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col>
+          <ion-button color="tertiary" fill="outline">
+            Solve
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Solve with spares
+          </ion-button>
+          <ion-button color="tertiary" fill="outline">
+            Upgrade Sales
+          </ion-button>
+
+          <ion-button fill="outline" color="tertiary">Replace</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>

@@ -1,0 +1,208 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Serial Search</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header style="padding-bottom: 0;">
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Serial Numbers
+            </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right">
+          <ion-button class="ion-text-right" [disabled]="!this.dataSource.length" color="tertiary" (click)="downloadSerials()">
+            Download CSV
+          </ion-button>
+          <ion-button color="tertiary" (click)="setFilter()">
+            Search
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar *ngIf="dataSource.loading$ | async" mode="indeterminate"></mat-progress-bar>
+    </div>
+    <ion-card-content class="ion-no-padding">
+      <ion-grid>
+        <form [formGroup]="filtersForm" (ngSubmit)="setFilter()">
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input matInput placeholder="Serial Number" formControlName="serial_no" (keyup.enter)="setFilter()" />
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field style="width: 100%;">
+                <input
+                type="text"
+                placeholder="Select Item"
+                matInput
+                (focusout)="validateInput(f.item_code, filteredItemList)"
+                formControlName="item_code"
+                [matAutocomplete]="item_code"
+              />
+              <mat-autocomplete
+                #item_code="matAutocomplete"
+                autoActiveFirstOption
+                [displayWith]="getOptionText">
+                <mat-option
+                  *ngFor="let option of filteredItemList | async"
+                  [value]="option">
+                  {{ option.item_name }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="f.item_code.hasError('falseValse')">
+                You should select a value from dropdown only. 
+                <strong>'{{f.item_code.value}}'</strong> is not allowed.
+              </mat-error>
+            </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size-md="6">
+              <mat-form-field class="full-width">
+                <input matInput placeholder="Warehouse" formControlName="warehouse" (keyup.enter)="setFilter()"
+                  [matAutocomplete]="autoWarehouse" required />
+              </mat-form-field>
+              <mat-autocomplete #autoWarehouse="matAutocomplete">
+                <mat-option *ngFor="let warehouse of warehouseList | async" [value]="warehouse.name">
+                  <span>{{warehouse.name}}</span>
+                </mat-option>
+              </mat-autocomplete>
+            </ion-col>
+            <ion-col size-md="3">
+              <mat-checkbox formControlName="sales_invoice_name">Sold</mat-checkbox>
+            </ion-col>
+            <ion-col size-md="3">
+              <mat-checkbox formControlName="purchase_invoice_name" >Purchased</mat-checkbox>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+            <ion-button
+                color="tertiary"
+                (click)="clearFilters()"
+                fill="outline"
+              >
+                Clear
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </form>
+      </ion-grid>
+
+      <table mat-table class="full-width-table" matSort aria-label="Serials" style="width: 100%;"
+        [dataSource]="dataSource" (matSortChange)="setFilter($event)">
+        <ng-container matColumnDef="sr_no">
+          <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+          <mat-cell *matCellDef="let row;let i=index ">
+            {{i+1}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="serial_no">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="serial_no">
+            Serial No.
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.serial_no}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="item_name">
+            Item Name
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.item_name}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_code">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="item_code">
+            Item Code
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.item_code}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="warehouse">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="warehouse">
+            Warehouse
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.warehouse}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="purchase_document_no">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="purchase_document_no">
+            Purchase Receipt
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.purchase_document_no}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="delivery_note">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="delivery_note">
+            Delivery Note
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.delivery_note}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="customer">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="customer">
+            Customer 
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.customer_name}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="supplier">
+          <mat-header-cell *matHeaderCellDef mat-sort-header="supplier">
+            Supplier
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{row.supplier}}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+
+        <mat-row *matRowDef="let row; columns: displayedColumns;" [routerLink]="['/serial-info',row.serial_no,row]"></mat-row>
+        <mat-footer-row class="footer" *matFooterRowDef="displayedColumns; sticky: true"></mat-footer-row>
+      </table>
+
+      <mat-card-actions>
+        <mat-paginator #paginator class="mat-paginator-sticky" (page)="getUpdate($event)" [length]="dataSource.length"
+          [pageSizeOptions]="[30, 50, 100, 500]">
+        </mat-paginator>
+      </mat-card-actions>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

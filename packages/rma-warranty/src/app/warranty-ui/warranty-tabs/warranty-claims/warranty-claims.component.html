@@ -1,0 +1,148 @@
+<ion-card>
+  <ion-card-content class="table-container">
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <div class="search-models">
+      <mat-form-field class="full-width">
+        <input
+          matInput
+          placeholder="Search"
+          [(ngModel)]="search"
+          (keyup.enter)="setFilter()"
+        />
+        <button mat-button matSuffix (click)="setFilter()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <table
+      mat-table
+      class="full-width-table"
+      [dataSource]="dataSource"
+      matSort
+      aria-label="Elements"
+    >
+      <ng-container matColumnDef="claim">
+        <th mat-header-cell *matHeaderCellDef>Claim Uuid</th>
+        <td mat-cell *matCellDef="let row">{{ row.claim }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="company">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          (click)="setFilter()"
+        >
+          Company
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.company }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="supplier">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          (click)="setFilter()"
+        >
+          Supplier
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.supplier }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Created Date</th>
+        <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="items">
+        <th mat-header-cell *matHeaderCellDef>Items</th>
+        <td mat-cell *matCellDef="let row">{{ row.items.length }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        (click)="updateItem(row)"
+      ></tr>
+    </table>
+
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>
+<ion-card>
+  <ion-card-header>
+    <ion-row *ngIf="selectedClaimDataSource.length" class="align">
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Items
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+      <ion-col class="ion-text-right" size="auto">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            {{ claim }}
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="!selectedClaimDataSource.length" class="align">
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Please Select a Warranty Claim
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+  <ion-card-content class="ion-no-padding table-container">
+    <table
+      mat-table
+      [dataSource]="selectedClaimDataSource"
+      class="mat-elevation-z8"
+      class="full-width-table"
+    >
+      <ng-container matColumnDef="serial_no">
+        <th mat-header-cell *matHeaderCellDef>Serial No</th>
+        <td mat-cell *matCellDef="let element">{{ element.serial_no }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="supplier">
+        <th mat-header-cell *matHeaderCellDef>Supplier</th>
+        <td mat-cell *matCellDef="let element">{{ supplier }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="item">
+        <th mat-header-cell *matHeaderCellDef>Item</th>
+        <td mat-cell *matCellDef="let element">{{ element.item }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="company">
+        <th mat-header-cell *matHeaderCellDef>Company</th>
+        <td mat-cell *matCellDef="let element">{{ company }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="selectedClaimColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: selectedClaimColumns"></tr>
+    </table>
+  </ion-card-content>
+</ion-card>

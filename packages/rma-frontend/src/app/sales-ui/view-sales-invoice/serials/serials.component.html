@@ -1,0 +1,212 @@
+<ion-fab vertical="top" horizontal="end" slot="fixed" class="ion-margin-end" *ngIf="remaining > 0">
+    <ion-fab-button [disabled]="!permissionState.delivery_note.create || submit" class="fab-position" (click)="submitDeliveryNote()">
+        <ion-icon name="lock-closed"></ion-icon>
+    </ion-fab-button>
+</ion-fab>
+<ion-card *ngIf="remaining > 0">
+    <ion-card-content>
+        <ion-grid class="ion-no-padding">
+            <ion-row class="align">
+                <ion-col>
+                    <mat-form-field class="example-full-width transform">
+                        <input type="text" placeholder="Select Warehouse" matInput [formControl]="warehouseFormControl" (focusout)="
+                validateInput(warehouseFormControl, filteredWarehouseList)
+              " [matAutocomplete]="auto" />
+                        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="getOptionText" (optionSelected)="warehouseOptionChanged($event.option.value)">
+                            <mat-option *ngFor="let option of filteredWarehouseList | async" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="warehouseFormControl.hasError('falseValse')">
+                            You should select a value from dropdown only.
+                            <strong>'{{ warehouseFormControl.value }}'</strong> is not allowed.
+                        </mat-error>
+                        <mat-error *ngIf="warehouseFormControl.hasError('required')">
+                            warehouse is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </ion-col>
+                <ion-col>
+                    <mat-form-field class="example-full-width transform">
+                        <input matInput [matDatepicker]="claimsReceivedDate" [formControl]="date" placeholder="Serial Assigned Date" readonly (dateChange)="claimsDate($event)" />
+                        <mat-datepicker-toggle matSuffix [for]="claimsReceivedDate"></mat-datepicker-toggle>
+                        <mat-datepicker #claimsReceivedDate disabled="false"></mat-datepicker>
+                        <mat-error *ngIf="date.hasError('required')">
+                            Date is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </ion-col>
+            </ion-row>
+            <ion-row>
+            </ion-row>
+        </ion-grid>
+    </ion-card-content>
+</ion-card>
+<app-assign-serial *ngIf="remaining > 0" [state]="state" [rangePickerState]="rangePickerState" (sendPickerState)="assignPickerState($event)" (sendCSVJSON)="addSerialsFromCsvJson($event)"></app-assign-serial>
+
+<ion-grid class="ion-no-padding" *ngIf="salesInvoiceDetails && remaining === 0">
+    <ion-row>
+        <ion-col>
+            <ion-text class="ion-text-center" style="color: black;">
+                <h1>All items already delivered</h1>
+            </ion-text>
+        </ion-col>
+    </ion-row>
+</ion-grid>
+
+<ion-card *ngIf="remaining > 0">
+    <ion-card-header>
+        <ion-card-title>
+            <ion-text color="tertiary">
+                Products
+            </ion-text>
+        </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+        <mat-table #table [dataSource]="itemDataSource" style="width: 100%;">
+            <ng-container matColumnDef="salesWarrantyMonths">
+                <mat-header-cell *matHeaderCellDef>Warranty In Months</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.salesWarrantyMonths }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="sr_no">
+                <mat-header-cell *matHeaderCellDef>No </mat-header-cell>
+                <mat-cell *matCellDef="let row;let i=index ">
+                  {{i+1}}
+                </mat-cell>
+                <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+              </ng-container>
+
+            <ng-container matColumnDef="item_name">
+                <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.item_name }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="qty">
+                <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.qty }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="assigned">
+                <mat-header-cell *matHeaderCellDef>Assigned</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.assigned || 0 }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="remaining">
+                <mat-header-cell *matHeaderCellDef>Remaining</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    {{ row.remaining || 0 }}
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="has_serial_no">
+                <mat-header-cell *matHeaderCellDef>Has Serial</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <mat-checkbox class="example-margin" [(ngModel)]="row.has_serial_no" [disabled]="true">
+                    </mat-checkbox>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="add_serial">
+                <mat-header-cell *matHeaderCellDef>Add Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ion-button [disabled]="row.remaining === 0" fill="outline" (click)="assignSerial(row)">
+                        <ion-icon name="Add"></ion-icon>
+                    </ion-button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="itemDisplayedColumns; sticky: true"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: itemDisplayedColumns"></mat-row>
+        </mat-table>
+    </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="remaining > 0">
+    <ion-card-header>
+        <ion-card-title>
+            <ion-text color="tertiary">
+                Serials
+            </ion-text>
+        </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+        <mat-table #table [dataSource]="serialDataSource" style="width: 100%;">
+            <ng-container matColumnDef="sr_no">
+                <mat-header-cell *matHeaderCellDef>No </mat-header-cell>
+                <mat-cell *matCellDef="let row;let i=index ">
+                  {{i+1}}
+                </mat-cell>
+                <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+              </ng-container>
+
+            <ng-container matColumnDef="item_name">
+                <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.item_name }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="qty">
+                <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <ng-container>
+                        {{ row.qty }}
+                    </ng-container>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="warranty_date">
+                <mat-header-cell *matHeaderCellDef>Warranty Date</mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <input class="example-full-width" matInput [(ngModel)]="row.warranty_date" [matDatepicker]="warranty_date" disabled />
+                    <mat-datepicker-toggle matSuffix [for]="warranty_date"></mat-datepicker-toggle>
+                    <mat-datepicker #warranty_date disabled="false"></mat-datepicker>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="serial_no">
+                <mat-header-cell *matHeaderCellDef>Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row;let i = index">
+                    <input (keyup.enter)="onSerialKepUp(i)" matInput id="serials{{i}}" oninput="this.value = this.value.toUpperCase()" *ngIf="!row.serial_no[1]" [disabled]="row.serial_no[0] === 'Non Serial Item' ? true : false" [(ngModel)]="row.serial_no[0]" />
+                    <p *ngIf="row.serial_no.length === 1 ? false : true">
+                        {{ getSerialsInputValue(row) }}
+                    </p>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="delete">
+                <mat-header-cell *matHeaderCellDef>Delete Serials</mat-header-cell>
+                <mat-cell *matCellDef="let row; let i = index">
+                    <ion-button color="danger" fill="clear" (click)="deleteRow(row, i)">
+                        <ion-icon name="trash"></ion-icon>
+                    </ion-button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="serialDisplayedColumns; sticky: true"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: serialDisplayedColumns; let i = index"></mat-row>
+        </mat-table>
+    </ion-card-content>
+</ion-card>
+
+
+<app-delivered-serials *ngIf="salesInvoiceDetails && !disableDeliveredSerialsCard"  [deliveredSerialsState]="deliveredSerialsState"></app-delivered-serials>

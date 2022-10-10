@@ -1,0 +1,186 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Credit Limit</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <form [formGroup]="customerProfileForm">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Customers
+          </ion-text>
+        </ion-card-title>
+      </ion-card-header>
+      <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+        <mat-progress-bar
+          *ngIf="dataSource.loading$ | async"
+          mode="indeterminate"
+        ></mat-progress-bar>
+      </div>
+      <ion-card-content class="ion-padding">
+        <div class="search-models">
+          <mat-form-field class="mat-input-wrapper">
+            <input
+              matInput
+              placeholder="Customer name"
+              [matAutocomplete]="auto"
+              formControlName="customer"
+              (focusout)="validateInput(f.customer, filteredCustomerList)"
+            />
+            <mat-autocomplete
+              autoActiveFirstOption
+              #auto="matAutocomplete"
+              [displayWith]="getCustomerOption"
+              (optionSelected)="setFilter($event.option.value)"
+            >
+              <mat-option
+                *ngFor="let option of filteredCustomerList | async"
+                [value]="option"
+              >
+                {{ option.customer_name }}
+                
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="f.customer.hasError('falseValse')">
+              You should select a value from dropdown only.
+              <strong>'{{f.customer.value}}'</strong> is not allowed.
+            </mat-error>
+          </mat-form-field>
+          <ion-button color="tertiary" (click)="clearFilters()" fill="outline">
+            Clear
+          </ion-button>
+        </div>
+        <div class="example-container mat-elevation-z8">
+          <table
+            mat-table
+            class="full-width-table"
+            [dataSource]="dataSource"
+            matSort
+            aria-label="Elements"
+          >
+            <!-- Customer -->
+            <ng-container matColumnDef="name">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header="name"
+                (click)="setFilter()"
+              >
+                Customer ID
+              </th>
+              <td mat-cell *matCellDef="let row">
+                {{row.name}}
+              </td>
+            </ng-container>
+
+            <!-- Customer -->
+            <ng-container matColumnDef="customer_name">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header="customer_name"
+                (click)="setFilter()"
+              >
+                Customer Name
+              </th>
+              <td mat-cell *matCellDef="let row">
+                {{row.customer_name}}
+              </td>
+            </ng-container>
+
+            <!-- Credit Limits -->
+            <ng-container matColumnDef="credit_limits">
+              <th mat-header-cell *matHeaderCellDef>
+                Extended Limit
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <ion-text *ngFor="let limit of row.credit_limits">
+                  {{limit.credit_limit | curFormat | async}}
+                </ion-text>
+              </td>
+            </ng-container>
+
+            <!-- Extended Credit Limit -->
+            <ng-container matColumnDef="extended_credit_limit">
+              <th mat-header-cell *matHeaderCellDef>
+                Base Credit Limit
+              </th>
+              <td mat-cell *matCellDef="let row">
+                {{row.baseCreditLimitAmount ? (row.baseCreditLimitAmount |
+                curFormat | async) : ''}}
+              </td>
+            </ng-container>
+
+            <!-- Expiry Date -->
+            <ng-container matColumnDef="expiry_date">
+              <th mat-header-cell *matHeaderCellDef class="text-center">
+                Expiry Date
+              </th>
+              <td class="ion-text-center" mat-cell *matCellDef="let row">
+                <ion-text>
+                  {{row.tempCreditLimitPeriod ? (row.tempCreditLimitPeriod |
+                  date:'mediumDate') : ''}}
+                </ion-text>
+              </td>
+            </ng-container>
+
+            <!-- Set On -->
+            <ng-container matColumnDef="set_on">
+              <th mat-header-cell *matHeaderCellDef class="text-center">
+                Set On
+              </th>
+              <td class="ion-text-center" mat-cell *matCellDef="let row">
+                <ion-text>
+                  {{row.creditLimitUpdatedOn ? (row.creditLimitUpdatedOn |
+                  date:'mediumDate') : ''}}
+                </ion-text>
+              </td>
+            </ng-container>
+
+            <!-- Set By -->
+            <ng-container matColumnDef="set_by">
+              <th mat-header-cell *matHeaderCellDef>
+                Set By
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <ion-text>
+                  {{row.creditLimitSetByFullName}}
+                </ion-text>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="displayedColumns; sticky: true"
+            ></tr>
+            <tr
+              tabindex="0"
+              mat-row
+              (click)="updateCreditLimitDialog(row)"
+              (keyup.enter)="updateCreditLimitDialog(row)"
+              *matRowDef="let row; columns: displayedColumns;"
+            ></tr>
+          </table>
+        </div>
+        <mat-card-actions>
+          <mat-paginator
+            #paginator
+            class="mat-paginator-sticky"
+            (page)="setFilter($event)"
+            [length]="dataSource.length"
+            [pageSizeOptions]="[30, 50, 100, 500]"
+          >
+          </mat-paginator>
+        </mat-card-actions>
+      </ion-card-content>
+    </form>
+  </ion-card>
+</ion-content>

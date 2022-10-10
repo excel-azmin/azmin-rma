@@ -1,0 +1,38 @@
+.full-width {
+  width: 100%;
+  color: black;
+}
+
+.footer {
+  font-weight: bold;
+}
+
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+}
+
+td.mat-column-star {
+  width: 20px;
+  padding-right: 8px;
+}
+
+th.mat-column-position,
+td.mat-column-position {
+  padding-left: 8px;
+}
+
+mat-header-cell {
+  flex-wrap: nowrap;
+  min-width: 150px;
+}
+
+.hash {
+  font-size: 20px;
+}

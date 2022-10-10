@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Problem</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Problems
+            </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right">
+          <ion-button color="tertiary" (click)="addProblem()">
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <ion-card-content class="ion-no-padding">
+      <div class="search-models">
+        <mat-form-field class="mat-input-wrapper">
+          <input
+            matInput
+            placeholder="Search"
+            [(ngModel)]="search"
+            (keyup.enter)="setFilter()"
+          />
+          <button mat-button matSuffix (click)="setFilter()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+      <div class="example-container mat-elevation-z8">
+        <mat-table #table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="sr_no">
+            <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+            <mat-cell *matCellDef="let row;let i=index ">
+              {{i+1}}
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="problem_name">
+            <mat-header-cell *matHeaderCellDef>
+              Problem
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" (click)="updateProblem(row.uuid)">
+              {{row.problem_name}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row ">
+              <ion-button
+                (click)="deleteProblem(row.uuid)"
+                fill="clear"
+                class="ion-no-padding"
+                color="danger"
+              >
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-button>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+
+          <mat-header-row
+            *matHeaderRowDef="displayedColumns; sticky: true"
+          ></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
+      </div>
+      <mat-card-actions>
+        <mat-paginator
+          #paginator
+          class="mat-paginator-sticky"
+          (page)="setFilter($event)"
+          [length]="dataSource.length"
+          [pageSizeOptions]="[30, 50, 100, 500]"
+        >
+        </mat-paginator>
+      </mat-card-actions>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

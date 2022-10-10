@@ -1,0 +1,49 @@
+.full-width {
+  width: 100%;
+  color: black;
+}
+
+table {
+  width: 150%;
+}
+
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+mat-header-cell {
+  flex-wrap: nowrap;
+  min-width: 100px;
+}
+
+[class*='mat-column-']{
+  flex: 0 0 7% !important;
+  min-width: 150px !important;
+}
+
+.mat-column-sr_no {
+  flex: 0 0 3% !important;
+  min-width: 10px !important;
+}
+
+
+
+ion-card.example-element-detail{
+  width: max-content;
+}
+
+ion-row.rowDetail{
+  width: max-content;
+}
+
+.cards{
+  float: left;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+

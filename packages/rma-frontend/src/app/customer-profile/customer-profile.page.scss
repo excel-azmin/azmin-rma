@@ -1,0 +1,34 @@
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+.example-full-width {
+  width: 100%;
+  color: black;
+}
+
+ion-button {
+  float: right;
+}
+
+table {
+  width: 100%;
+}
+
+td.mat-column-star {
+  width: 20px;
+  padding-right: 8px;
+}
+
+th.mat-column-position,
+td.mat-column-position {
+  padding-left: 8px;
+}
+
+mat-header-cell {
+  flex-wrap: nowrap;
+  min-width: 120px;
+}

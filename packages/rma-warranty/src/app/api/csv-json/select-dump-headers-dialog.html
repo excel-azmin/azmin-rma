@@ -1,0 +1,9 @@
+
+
+<section class="headers-section" *ngFor="let obj of keys">
+    <mat-checkbox [(ngModel)]="data[obj]" [(checked)]="data[obj]" >{{ parsedTitle(obj) }}</mat-checkbox>
+  </section>
+
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Download</button>
+  </div>

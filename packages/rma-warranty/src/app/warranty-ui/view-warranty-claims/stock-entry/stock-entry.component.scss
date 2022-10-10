@@ -1,0 +1,28 @@
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-column-date {
+  max-width: 80px;
+}
+
+.mat-column-rollback {
+  max-width: 70px;
+  padding-right: 8px;
+}
+
+th.mat-column-position,
+td.mat-column-position {
+  padding-left: 8px;
+}
+
+mat-header-cell {
+  flex-wrap: nowrap;
+}

@@ -1,0 +1,9 @@
+{
+  "debug.node.autoAttach": "off",
+  "eslint.workingDirectories": [
+    { "directory": "packages/rma-server", "changeProcessCWD": true },
+    { "directory": "packages/rma-mobile", "changeProcessCWD": true },
+    { "directory": "packages/rma-frontend", "changeProcessCWD": true },
+    { "directory": "packages/rma-warranty", "changeProcessCWD": true }
+  ]
+}

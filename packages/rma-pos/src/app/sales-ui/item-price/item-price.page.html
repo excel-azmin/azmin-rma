@@ -1,0 +1,340 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Item Price</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="tertiary"> Items </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+      <mat-progress-bar
+        *ngIf="dataSource.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <ion-card-content class="ion-padding">
+      <ion-grid>
+        <form [formGroup]="itemsForm">
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Item Name"
+                  [matAutocomplete]="itemNameAutocomplete"
+                  formControlName="itemName"
+                  (focusout)="validateInput(f.itemName, filteredItemNameList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemNameAutocomplete="matAutocomplete"
+                  [displayWith]="getItemNameOption"
+                  (optionSelected)="setFilter($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredItemNameList | async"
+                    [value]="option"
+                  >
+                    {{ option.item_name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.itemName.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.itemName.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Item Group"
+                  [matAutocomplete]="itemGroupAutocomplete"
+                  formControlName="itemGroup"
+                  (focusout)="validateInput(f.itemGroup, filteredItemGroupList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemGroupAutocomplete="matAutocomplete"
+                  [displayWith]="getItemGroupOption"
+                  (optionSelected)="setFilter($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredItemGroupList | async"
+                    [value]="option"
+                  >
+                    {{ option.item_group_name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.itemGroup.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.itemGroup.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Brand"
+                  [matAutocomplete]="itemBrandAutocomplete"
+                  formControlName="itemBrand"
+                  (focusout)="validateInput(f.itemBrand, filteredItemBrandList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemBrandAutocomplete="matAutocomplete"
+                  [displayWith]="getItemBrandOption"
+                  (optionSelected)="setFilter($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredItemBrandList | async"
+                    [value]="option"
+                  >
+                    {{ option.brand }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.itemBrand.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.itemBrand.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+              <ion-button
+                color="tertiary"
+                (click)="clearFilters()"
+                fill="outline"
+              >
+                Clear
+              </ion-button>
+              <ion-button
+                *ngIf="permissionState?.item_price?.update"
+                color="warning"
+                (click)="syncItems()"
+                fill="outline"
+              >
+                Sync All
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </form>
+      </ion-grid>
+      <div class="example-container mat-elevation-z8">
+        <table
+          mat-table
+          class="full-width-table"
+          [dataSource]="dataSource"
+          matSort
+          (matSortChange)="setFilter($event)"
+          aria-label="Elements"
+        >
+          <!-- Item -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="name">
+              Item
+            </th>
+            <td mat-cell *matCellDef="let row">{{row.name}}</td>
+          </ng-container>
+
+          <!-- Item Name -->
+          <ng-container matColumnDef="item_name">
+            <th mat-header-cell *matHeaderCellDef>Item Name</th>
+            <td mat-cell *matCellDef="let row">{{row.item_name}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="has_serial">
+            <th mat-header-cell *matHeaderCellDef>Serialized</th>
+            <td mat-cell *matCellDef="let row">
+              <section>
+                <mat-checkbox
+                  [(ngModel)]="row.has_serial_no"
+                  (ngModelChange)="itemSerialized($event, row.item_name)"
+                  class="example-margin"
+                ></mat-checkbox>
+              </section>
+            </td>
+          </ng-container>
+
+          <!-- sales Warranty Months Column -->
+          <ng-container matColumnDef="salesWarrantyMonths">
+            <th mat-header-cell *matHeaderCellDef class="ion-text-center">
+              Sales Warranty Months
+            </th>
+
+            <td
+              class="ion-text-center"
+              mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="d"
+              tabindex="0"
+              (keyup.enter)="d.open()"
+              (click)="d.open()"
+            >
+              <ion-text *ngIf="permissionState?.item_price?.read">
+                {{row.salesWarrantyMonths}}
+              </ion-text>
+              <sat-popover
+                #d
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateSalesWarrantyMonths(row, $event)"
+              >
+                <edit-days
+                  column="sales"
+                  *ngIf="permissionState?.item_price?.update"
+                  [value]="row.salesWarrantyMonths"
+                ></edit-days>
+              </sat-popover>
+            </td>
+          </ng-container>
+
+          <!-- purchase Warranty Months Column -->
+          <ng-container matColumnDef="purchaseWarrantyMonths">
+            <th mat-header-cell *matHeaderCellDef class="ion-text-center">
+              Purchase Warranty Months
+            </th>
+
+            <td
+              class="ion-text-center"
+              mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="d"
+              tabindex="0"
+              (keyup.enter)="d.open()"
+              (click)="d.open()"
+            >
+              <ion-text> {{row.purchaseWarrantyMonths}} </ion-text>
+              <sat-popover
+                #d
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updatePurchaseWarrantyMonths(row, $event)"
+              >
+                <edit-days
+                  column="purchase"
+                  [value]="row.purchaseWarrantyMonths"
+                ></edit-days>
+              </sat-popover>
+            </td>
+          </ng-container>
+          <!-- Price Column -->
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef class="ion-text-center">
+              Price
+            </th>
+            <td
+              class="ion-text-center"
+              mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ion-text *ngIf="permissionState?.item_price?.read">
+                {{row.minimumPrice || 0 | curFormat | async}}
+              </ion-text>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateMinPrice(row, $event)"
+              >
+                <edit-price
+                  *ngIf="permissionState?.item_price?.update"
+                  [value]="row.minimumPrice"
+                  column="price"
+                ></edit-price>
+              </sat-popover>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="mrp">
+            <th mat-header-cell *matHeaderCellDef class="ion-text-center">
+              MRP
+            </th>
+            <td
+              class="ion-text-center"
+              mat-cell
+              *matCellDef="let row"
+              [satPopoverAnchor]="p"
+              tabindex="0"
+              (keyup.enter)="p.open()"
+              (click)="p.open()"
+            >
+              <ion-text *ngIf="permissionState?.item_price?.read">
+                {{row.mrp || 0 | curFormat | async}}
+              </ion-text>
+              <sat-popover
+                #p
+                hasBackdrop
+                xAlign="start"
+                yAlign="start"
+                (closed)="updateMRP(row, $event)"
+              >
+                <edit-price
+                  [value]="row.mrp"
+                  column="mrp"
+                  *ngIf="permissionState?.item_price?.update"
+                ></edit-price>
+              </sat-popover>
+            </td>
+          </ng-container>
+
+          <!-- Selling Price Column -->
+          <ng-container matColumnDef="selling_price">
+            <th mat-header-cell *matHeaderCellDef class="text-center">
+              Selling Price
+            </th>
+            <td
+              class="ion-text-center"
+              mat-cell
+              *matCellDef="let row; let i = index"
+            >
+              <ion-text *ngIf="row.selling_price !== undefined">
+                {{row.selling_price | curFormat | async}}
+              </ion-text>
+              <ion-button
+                *ngIf="row.selling_price === undefined"
+                (click)="loadPrice(row, i)"
+                fill="clear"
+              >
+                <ion-icon slot="icon-only" name="refresh"></ion-icon>
+              </ion-button>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="displayedColumns; sticky: true"
+          ></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+      <mat-card-actions>
+        <mat-paginator
+          #paginator
+          class="mat-paginator-sticky"
+          (page)="getUpdate($event)"
+          [length]="dataSource.length"
+          [pageSizeOptions]="[30, 50, 100, 500]"
+        >
+        </mat-paginator>
+      </mat-card-actions>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

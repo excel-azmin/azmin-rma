@@ -1,0 +1,293 @@
+<ion-fab
+  *ngIf="salesInvoiceDetails?.status === 'Draft'"
+  vertical="top"
+  horizontal="end"
+  slot="fixed"
+  class="ion-margin-end"
+>
+  <ion-fab-button class="fab-position">
+    <ion-icon name="lock-closed-outline"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-list side="start" class="fab-position">
+    <ion-button
+    color="medium"
+    *ngIf="permissionState.sales_invoice.update"
+    (click)="deleteSalesInvoice()"
+  >
+    Delete
+  </ion-button>
+    <ion-button *ngIf="permissionState.sales_invoice.delete" color="danger" (click)="rejectSalesInvoice()">
+      Reject
+    </ion-button>
+    <ion-button
+      color="warning"
+      *ngIf="permissionState.sales_invoice.update"
+      [routerLink]="['/sales/add-sales-invoice', 'edit', invoiceUuid]"
+    >
+      Edit
+    </ion-button>
+    <ion-button (click)="submitSalesInvoice()" *ngIf="permissionState.sales_invoice.submit">
+      Submit
+    </ion-button>
+  </ion-fab-list>
+</ion-fab>
+<ion-fab
+  vertical="top"
+  horizontal="end"
+  slot="fixed"
+  *ngIf="
+    permissionState.sales_invoice.delete && (salesInvoiceDetails?.status === 'To Deliver' ||
+    salesInvoiceDetails?.status === 'Completed')
+  "
+  class="ion-margin-end"
+>
+  <ion-fab-button
+    color="danger"
+    class="fab-position"
+    (click)="cancelSalesInvoice()"
+  >
+    <ion-icon name="close-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<ion-card>
+  <ion-card-content>
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Customer</ion-label>
+            <ion-input
+              placeholder="Company"
+              readonly="true"
+              type="string"
+              value="{{
+                salesInvoiceDetails?.customer_name
+                  ? salesInvoiceDetails?.customer_name + ' (' + salesInvoiceDetails?.customer + ')'
+                  : salesInvoiceDetails?.customer
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col *ngIf="salesInvoiceDetails?.name">
+          <ion-item lines="none" [href]="viewSalesInvoiceUrl" target="_blank">
+            <ion-label position="floating">Sales Invoice Number</ion-label>
+            <ion-input
+              readonly="true"
+              type="string"
+              value="{{
+                salesInvoiceDetails?.name ? salesInvoiceDetails.name : ''
+              }}"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col *ngIf="!salesInvoiceDetails?.name">
+          <ion-item lines="none">
+            <ion-label position="floating">Sales Invoice Number</ion-label>
+            <ion-input
+              readonly="true"
+              type="string"
+              placeholder="Submit Invoice to See SI Number"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Address</ion-label>
+            <ion-input
+              readonly="true"
+              type="string"
+              value="{{
+                salesInvoiceDetails?.address_display
+                  ? salesInvoiceDetails.address_display
+                  : ''
+              }}"
+              placeholder="Address"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Posting Date</ion-label>
+            <ion-datetime
+              readonly
+              placeholder="Posting Date"
+              display-format="DD-MM-YYYY"
+              value="{{
+                salesInvoiceDetails?.posting_date
+                  ? salesInvoiceDetails.posting_date
+                  : ''
+              }}"
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Remark</ion-label>
+            <ion-textarea
+              readonly="true"
+              placeholder="Remark"
+              value="{{ salesInvoiceDetails?.remarks }}"
+            ></ion-textarea>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Due Date</ion-label>
+            <ion-datetime
+              readonly
+              placeholder="Due Date"
+              value="{{
+                salesInvoiceDetails?.due_date
+                  ? salesInvoiceDetails.due_date
+                  : ''
+              }}"
+              display-format="DD-MM-YYYY"
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Territory</ion-label>
+            <ion-input
+              readonly="true"
+              type="text"
+              value="{{
+                salesInvoiceDetails?.territory
+                  ? salesInvoiceDetails.territory
+                  : ''
+              }}"
+              placeholder="Territory"
+            >
+            </ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Warehouse</ion-label>
+            <ion-input
+              readonly="true"
+              type="text"
+              value="{{
+                salesInvoiceDetails?.delivery_warehouse
+                  ? salesInvoiceDetails.delivery_warehouse
+                  : ''
+              }}"
+              placeholder="Please assign Serials to view Warehouse"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label>Campaign Invoice</ion-label>
+            <ion-checkbox
+              slot="start"
+              disabled
+              [checked]="campaign"
+            ></ion-checkbox>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-item lines="none">
+            <ion-label position="floating">Status</ion-label>
+            <ion-input
+              readonly="true"
+              type="text"
+              value="{{ salesInvoiceDetails?.status }}"
+              placeholder="Status"
+              [ngStyle]="getStatusColor(salesInvoiceDetails?.status)"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="permissionState?.stock_entry?.accept">
+        <ion-col size-md="6">
+          <ion-item lines="none">
+            <mat-form-field class="full-width">
+              <mat-label>Delivery Status</mat-label>
+              <mat-select 
+                [formControl]="delivery_status"
+                (selectionChange)="deliveryStatusChanged($event.value)"
+              >
+                <mat-option
+                  *ngFor="let delivery_status of delivery_statuses"
+                  [value]="delivery_status"
+                >
+                  {{ delivery_status }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Items
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+  <ion-card-content class="ion-no-padding">
+    <mat-table #table [dataSource]="dataSource" style="width: 100%;">
+      <ng-container matColumnDef="item_name">
+        <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.item_name }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef>Total :</mat-footer-cell>
+      </ng-container>
+      <ng-container matColumnDef="qty">
+        <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.qty }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef>{{ total_qty }}</mat-footer-cell>
+      </ng-container>
+      <ng-container matColumnDef="rate">
+        <mat-header-cell *matHeaderCellDef>Rate</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.rate | curFormat | async }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+      <ng-container matColumnDef="amount">
+        <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{
+          row.rate * row.qty | curFormat | async
+        }}</mat-cell>
+        <mat-footer-cell *matFooterCellDef>
+          {{ total | curFormat | async }}
+        </mat-footer-cell>
+      </ng-container>
+      <mat-header-row
+        *matHeaderRowDef="displayedColumns; sticky: true"
+      ></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      <mat-footer-row
+        class="footer"
+        *matFooterRowDef="displayedColumns; sticky: true"
+      ></mat-footer-row>
+    </mat-table>
+  </ion-card-content>
+</ion-card>

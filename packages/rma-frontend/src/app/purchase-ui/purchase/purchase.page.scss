@@ -1,0 +1,64 @@
+.sc-ion-card-md-h {
+  min-height: 90vh;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.search-models {
+  padding: 0em 1em 0em 1em;
+}
+
+.mat-column-total {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 20px;
+}
+
+.footer {
+  font-weight: bold;
+}
+
+.mat-column-sr_no {
+  flex: 0 0 5%;
+}
+
+.date-filter-text {
+  font-size: 0.7rem;
+}
+
+.full-width {
+  width: 100%;
+  color: black;
+}
+
+.date-filter-text {
+  font-size: 0.7rem;
+}
+
+.example-container {
+  box-shadow: none;
+  height: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+// common width for all columns
+[class*='mat-column-']{
+  flex: 0 0 13.5% !important;
+  min-width: 150px !important;
+}
+
+// similarly override any table column with name from matColumnDef.
+.mat-column-sr_no {
+  flex: 0 0 5% !important;
+  min-width: 10px !important;
+}
+.right-margin{
+  margin-right: 1em
+}
+
+::ng-deep .mat-progress-bar-fill::after {
+  background-color: green;
+}

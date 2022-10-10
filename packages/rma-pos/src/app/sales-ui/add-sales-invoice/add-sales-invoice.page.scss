@@ -1,0 +1,55 @@
+.add-comment {
+  opacity: 0.4;
+}
+
+.fab-position {
+  position: absolute;
+  top: -35px;
+  right: 0;
+}
+
+.example-full-width {
+  width: 100%;
+  color: black;
+}
+
+.footer {
+  font-weight: bold;
+}
+
+.mat-column-delete {
+  flex: 0 0 5%;
+}
+
+mat-header-cell {
+  display: flex;
+  justify-content: center;
+}
+
+mat-footer-cell {
+  display: flex;
+  justify-content: center;
+}
+
+mat-header-row {
+  display: flex;
+  justify-content: center;
+}
+mat-footer-row {
+  display: flex;
+  justify-content: center;
+}
+
+mat-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.grid-container {
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.grid-card {
+  height: 95%;
+}

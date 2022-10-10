@@ -1,0 +1,61 @@
+::-ms-browse {
+  background: #633ce0;
+  color: #ffffff;
+  border: 1px solid #633ce0;
+  padding: 10px;
+  border-radius: 15px;
+}
+::-webkit-file-upload-button {
+  background: #633ce0;
+  color: #ffffff;
+  border: 1px solid #633ce0;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+.add-comment {
+  opacity: 0.4;
+}
+
+.fab-position {
+  position: absolute;
+  top: -35px;
+  right: 0;
+}
+
+.example-full-width {
+  width: 97%;
+  color: black;
+}
+
+.footer {
+  font-weight: bold;
+}
+
+.mat-column-delete {
+  flex: 0 0 5%;
+}
+
+mat-header-cell {
+  display: flex;
+  justify-content: center;
+}
+
+mat-footer-cell {
+  display: flex;
+  justify-content: center;
+}
+
+mat-header-row {
+  display: flex;
+  justify-content: center;
+}
+mat-footer-row {
+  display: flex;
+  justify-content: center;
+}
+
+mat-cell {
+  display: flex;
+  justify-content: center;
+}

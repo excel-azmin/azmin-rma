@@ -1,0 +1,476 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text> RMA Server Settings </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="companySettingsForm">
+        <ion-grid class="ion-padding">
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  required
+                  placeholder="Default Company"
+                  aria-label="Default Company"
+                  [matAutocomplete]="autoCompany"
+                  (focusout)="validateInput(f.defaultCompany, companies)"
+                  formControlName="defaultCompany"
+                />
+                <mat-autocomplete #autoCompany="matAutocomplete">
+                  <mat-option
+                    *ngFor="let company of companies | async"
+                    [value]="company.name"
+                  >
+                    <span>{{company.name}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.defaultCompany.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.defaultCompany.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  required
+                  placeholder="ERPNext Timezone"
+                  aria-label="ERPNext Timezone"
+                  (focusout)="validateInput(f.timeZone, timezones)"
+                  [matAutocomplete]="autoTZ"
+                  formControlName="timeZone"
+                />
+                <mat-autocomplete #autoTZ="matAutocomplete">
+                  <mat-option
+                    *ngFor="let timezone of timezones | async"
+                    [value]="timezone"
+                  >
+                    <span>{{timezone}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.timeZone.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.timeZone.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  required
+                  placeholder="Selling Price List"
+                  aria-label="Selling Price List"
+                  (focusout)="validateInput(f.sellingPriceList, sellingPriceLists)"
+                  [matAutocomplete]="autoSellingPriceList"
+                  formControlName="sellingPriceList"
+                />
+                <mat-autocomplete #autoSellingPriceList="matAutocomplete">
+                  <mat-option
+                    *ngFor="let priceList of sellingPriceLists | async"
+                    [value]="priceList.name"
+                  >
+                    <span>{{priceList.name}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.sellingPriceList.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.sellingPriceList.value}}'</strong> is not
+                  allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Debtor Account"
+                  aria-label="Debtor Account"
+                  [matAutocomplete]="autoDebtorAccount"
+                  (focusout)="validateInput(f.debtorAccount, accounts)"
+                  formControlName="debtorAccount"
+                />
+                <mat-autocomplete #autoDebtorAccount="matAutocomplete">
+                  <mat-option
+                    *ngFor="let account of accounts | async"
+                    [value]="account.name"
+                  >
+                    <span>{{account.name}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.debtorAccount.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.debtorAccount.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Transfer Warehouse"
+                  aria-label="Transfer Warehouse"
+                  (focusout)="validateInput(f.transferWarehouse, warehouses)"
+                  [matAutocomplete]="autoTransferWarehouse"
+                  formControlName="transferWarehouse"
+                />
+                <mat-autocomplete #autoTransferWarehouse="matAutocomplete">
+                  <mat-option
+                    *ngFor="let warehouse of warehouses | async"
+                    [value]="warehouse.name"
+                  >
+                    <span>{{warehouse.name}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.transferWarehouse.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.transferWarehouse.value}}'</strong> is not
+                  allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="POS Profile"
+                  aria-label="POS Profile"
+                  (focusout)="validateInput(f.posProfile, posProfiles)"
+                  [matAutocomplete]="posProfile"
+                  formControlName="posProfile"
+                />
+                <mat-autocomplete #posProfile="matAutocomplete">
+                  <mat-option
+                    *ngFor="let profile of posProfiles |async"
+                    [value]="profile.name"
+                  >
+                    <span>{{profile.name}}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.posProfile.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.posProfile.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Authorization Server URL"
+                  type="text"
+                  formControlName="authServerURL"
+                  readonly
+                />
+                <mat-checkbox formControlName="validateStock" matSuffix
+                  >Validate Stock</mat-checkbox
+                >
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="App URL"
+                  type="text"
+                  formControlName="appURL"
+                  readonly
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Warranty App URL"
+                  type="text"
+                  formControlName="warrantyAppURL"
+                  readonly
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="POS App URL"
+                  type="text"
+                  formControlName="posAppURL"
+                  readonly
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Frontend Client ID"
+                  type="text"
+                  formControlName="frontendClientId"
+                  required
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Backend Client ID"
+                  type="text"
+                  formControlName="backendClientId"
+                  required
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Service Account"
+                  type="text"
+                  formControlName="serviceAccountUser"
+                  required
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  required
+                  formControlName="serviceAccountSecret"
+                  matInput
+                  type="password"
+                  placeholder="Service Account Secret"
+                  [type]="hideSASecret ? 'password' : 'text'"
+                />
+                <mat-icon matSuffix (click)="hideSASecret = !hideSASecret">
+                  {{hideSASecret ? 'visibility' : 'visibility_off'}}
+                </mat-icon>
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Service Account API Key"
+                  type="text"
+                  formControlName="serviceAccountApiKey"
+                  required
+                />
+              </mat-form-field>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  required
+                  formControlName="serviceAccountApiSecret"
+                  matInput
+                  type="password"
+                  placeholder="Service Account API Secret"
+                  [type]="hideSAApiSecret ? 'password' : 'text'"
+                />
+                <mat-icon
+                  matSuffix
+                  (click)="hideSAApiSecret = !hideSAApiSecret"
+                >
+                  {{hideSAApiSecret ? 'visibility' : 'visibility_off'}}
+                </mat-icon>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <ion-card-header>
+          <ion-card-title>
+            <ion-text> Print Settings </ion-text>
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-grid class="ion-padding">
+          <ion-row>
+            <ion-col size-md="6">
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Header Image"
+                  type="text"
+                  formControlName="headerImageURL"
+                />
+              </mat-form-field>
+            </ion-col>
+
+            <ion-col size-md="6">
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Header Width"
+                  type="number"
+                  formControlName="headerWidth"
+                />
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size-md="6">
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Footer Image"
+                  type="text"
+                  formControlName="footerImageURL"
+                />
+              </mat-form-field>
+            </ion-col>
+
+            <ion-col size-md="6">
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Footer Width"
+                  type="number"
+                  formControlName="footerWidth"
+                />
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <ion-grid class="ion-padding">
+          <ion-row>
+            <ion-col class="ion-no-padding">
+              <ion-card-header style="padding-left: 0">
+                <ion-card-title>
+                  <ion-text> Brand Settings </ion-text>
+                </ion-card-title>
+              </ion-card-header>
+            </ion-col>
+
+            <ion-col class="ion-no-padding">
+              <ion-card-header style="padding-left: 0">
+                <ion-card-title>
+                  <ion-text> Backdated Controls </ion-text>
+                </ion-card-title>
+              </ion-card-header>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matTooltip="Standard Favicon size : 32x32"
+                  matInput
+                  placeholder="Favicon Image"
+                  type="text"
+                  formControlName="faviconURL"
+                />
+              </mat-form-field>
+            </ion-col>
+
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="No. of days"
+                  type="number"
+                  formControlName="backdatedInvoicesForDays"
+                  [readonly]="!this.f.backdatedInvoices.value"
+                />
+                <mat-checkbox matSuffix formControlName="backdatedInvoices">
+                  Allow Backdated Controls
+                </mat-checkbox>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </form>
+      <ion-grid class="ion-padding">
+        <ion-row>
+          <ion-button
+            color="light"
+            [disabled]="!companySettingsForm.valid"
+            (click)="updateSettings()"
+          >
+            Update
+          </ion-button>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title> Territory for Warehouse </ion-card-title>
+      <ion-fab vertical="top" horizontal="end">
+        <ion-fab-button color="light" (click)="mapTerritory()">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="ion-padding">
+        <mat-form-field class="mat-input-wrapper">
+          <input
+            matInput
+            placeholder="Search"
+            [(ngModel)]="search"
+            (keyup.enter)="setFilter()"
+          />
+          <button mat-button matSuffix (click)="setFilter()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+        <section class="ion-text-right">
+          <mat-checkbox
+            class="example-margin"
+            (ngModelChange)="setFilter($event)"
+            [(ngModel)]="group"
+          >
+            In Group
+          </mat-checkbox>
+        </section>
+      </div>
+      <table
+        mat-table
+        class="mat-input-wrapper"
+        [dataSource]="territoryDataSource"
+        matSort
+        aria-label="Elements"
+      >
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            (click)="setFilter()"
+          >
+            Name
+          </th>
+          <td mat-cell *matCellDef="let row">{{row.name}}</td>
+        </ng-container>
+
+        <!-- Warehouse Column -->
+        <ng-container matColumnDef="warehouse">
+          <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-chip-list aria-label="Fish selection">
+              <mat-chip
+                *ngFor="let warehouse of getChips(row.warehouse)"
+                color="primary"
+                selected
+              >
+                {{warehouse}}
+              </mat-chip>
+            </mat-chip-list>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></tr>
+        <tr
+          mat-row
+          (click)="mapTerritory(row.uuid, row.name, row.warehouse)"
+          *matRowDef="let row; columns: displayedColumns;"
+        ></tr>
+      </table>
+
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="territoryDataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

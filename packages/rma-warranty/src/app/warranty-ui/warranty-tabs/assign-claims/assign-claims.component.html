@@ -1,0 +1,127 @@
+<ion-card>
+  <ion-card-content class="ion-no-padding">
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col size="5">
+          <ion-item lines="none">
+            <ion-label position="floating">Company</ion-label>
+            <ion-select
+              interface="popover"
+              placeholder="Select Series"
+              [(ngModel)]="company"
+              #C
+              (ionChange)="populateTable()"
+            >
+              <ion-select-option value="ExcelBd">ExcelBd</ion-select-option>
+              <ion-select-option value="Castlecraft"
+                >Castlecraft</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col offset="2" size="5">
+          <ion-item lines="none">
+            <ion-label position="floating">Supplier</ion-label>
+            <ion-select
+              interface="popover"
+              placeholder="Select Series"
+              [(ngModel)]="supplier"
+              #C
+              (ionChange)="populateTable()"
+            >
+              <ion-select-option value="Dhaka central dealer"
+                >Dhaka central dealer</ion-select-option
+              >
+              <ion-select-option value="ExcelBd seller"
+                >ExcelBd seller</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row class="align">
+        <ion-col size="5" class="ion-text-left">
+          <input
+            type="file"
+            id="txtFileUpload"
+            (change)="fileChangedEvent($event)"
+            accept=".csv"
+          />
+        </ion-col>
+        <ion-col offset="2" size="5">
+          <ion-item>
+            <ion-label position="floating">Date</ion-label>
+            <ion-input
+              placeholder="Please select date"
+              type="string"
+              [(ngModel)]="date"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card *ngIf="csvFile">
+  <ion-card-header>
+    <ion-row class="align">
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Claims
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+      <ion-col class="ion-text-right" size="auto">
+        <ion-button
+          color="tertiary"
+          fill="outline"
+          (click)="createWarrantyClaims()"
+        >
+          Create Warranty Claim's
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+  <ion-card-content class="ion-no-padding">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef>Claim No.</th>
+        <td mat-cell *matCellDef="let element">
+          Claim-000{{ element.position }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="serial">
+        <th mat-header-cell *matHeaderCellDef>Serial No</th>
+        <td mat-cell *matCellDef="let element">{{ element.serial }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="item">
+        <th mat-header-cell *matHeaderCellDef>Item</th>
+        <td mat-cell *matCellDef="let element">{{ element.item }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="company">
+        <th mat-header-cell *matHeaderCellDef>Company</th>
+        <td mat-cell *matCellDef="let element">{{ element.company }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="supplier">
+        <th mat-header-cell *matHeaderCellDef>Supplier</th>
+        <td mat-cell *matCellDef="let element">{{ element.supplier }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="claimsReceivedDate">
+        <th mat-header-cell *matHeaderCellDef>Claim Received Date</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.claimsReceivedDate }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </ion-card-content>
+</ion-card>

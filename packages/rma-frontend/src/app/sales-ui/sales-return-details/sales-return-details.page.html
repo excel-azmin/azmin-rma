@@ -1,0 +1,200 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Sales Return</ion-title>
+  <ion-buttons slot="end" *ngIf="salesReturnDetails?.name">
+    <ion-button (click)="print()" color="primary">
+      <ion-icon slot="icon-only" name="print-outline"></ion-icon>
+    </ion-button>
+  </ion-buttons>
+</ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="primary">
+          Details
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="ion-no-padding">
+        <ion-row>
+          <ion-col>
+            <ion-item lines="none">
+              <ion-label position="floating">Customer</ion-label>
+              <ion-input
+                placeholder="Customer"
+                readonly="true"
+                type="string"
+                [value]="salesReturnDetails?.customer ? salesReturnDetails?.customer : '' "
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col>
+            <ion-item lines="none" [href]="viewSalesReturnURL" target="_blank">
+              <ion-label position="floating">Sales Return Name</ion-label>
+              <ion-input
+                readonly="true"
+                type="string"
+                [value]="salesReturnDetails?.name ? salesReturnDetails.name : ''"
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-item lines="none">
+              <ion-label position="floating">Territory</ion-label>
+              <ion-input
+                readonly="true"
+                type="string"
+                [value]="salesReturnDetails?.territory ? salesReturnDetails?.territory : '' "
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col>
+            <ion-item lines="none">
+              <ion-label position="floating">Posting Date</ion-label>
+              <ion-datetime
+                readonly
+                placeholder="Posting Date"
+                display-format="DD-MM-YYYY"
+                [value]="salesReturnDetails?.posting_date ? salesReturnDetails.posting_date : ''"
+              ></ion-datetime>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-item lines="none">
+              <ion-label position="floating">Warehouse</ion-label>
+              <ion-input
+                readonly="true"
+                type="string"
+                [value]="salesReturnDetails?.set_warehouse ? salesReturnDetails?.set_warehouse : '' "
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col>
+            <ion-item lines="none">
+              <ion-label position="floating">Remarks</ion-label>
+              <ion-input
+              readonly="true"
+              type="string"
+              [value]="salesReturnDetails?.instructions || '' "
+              ></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary">
+              Items
+            </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <mat-table #table [dataSource]="dataSource" style="width: 100%;">
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ 0 - row.qty }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="rate">
+          <mat-header-cell *matHeaderCellDef>Rate</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.rate | curFormat | async }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+          <mat-cell *matCellDef="let row"
+            >{{ 0 - (row.rate * row.qty) | curFormat | async }}</mat-cell
+          >
+        </ng-container>
+        <mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      </mat-table>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="primary">
+          Serials
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <div class="ion-padding">
+        <mat-form-field class="mat-input-wrapper">
+          <mat-label>Serial Number</mat-label>
+          <input
+            matInput
+            (keyup)="applyFilter($event)"
+            placeholder="Ex.ITEM0001"
+          />
+        </mat-form-field>
+      </div>
+      <mat-table #table [dataSource]="serialDataSource" style="width: 100%;">
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="serial">
+          <mat-header-cell *matHeaderCellDef>Serial Number</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.serial_no }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <mat-header-row
+          *matHeaderRowDef="serialDisplayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row
+          *matRowDef="let row; columns: serialDisplayedColumns"
+        ></mat-row>
+      </mat-table>
+      <mat-paginator
+        [pageSizeOptions]="[30, 50, 100, 500]"
+        showFirstLastButtons
+      ></mat-paginator>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,17 @@
+DB_USER=admin
+DB_PASSWORD=admin
+DB_NAME=test_rma-server
+MONGODB_ROOT_PASSWORD=admin
+MONGODB_PASSWORD=admin
+CACHE_DB_NAME=cache-db
+CACHE_DB_USER=cache-db
+CACHE_DB_PASSWORD=admin
+SERVER_DB_NAME=rma-server
+SERVER_DB_USER=rma-server
+SERVER_DB_PASSWORD=admin
+SITES=rma.example.com
+LETSENCRYPT_EMAIL=admin@example.com
+
+MYSQL_ROOT_PASSWORD=admin
+MARIADB_HOST=mariadb
+VERSION=v12

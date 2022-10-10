@@ -1,0 +1,294 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Purchase</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <ion-card>
+    <form [formGroup]="purchaseForm">
+      <ion-card-header>
+        <ion-row class="align">
+          <ion-col>
+            <ion-card-title>
+              <ion-text color="tertiary">
+                Purchase Invoices
+              </ion-text>
+            </ion-card-title>
+          </ion-col>
+        </ion-row>
+      </ion-card-header>
+      <div class="loading-shade" *ngIf="dataSource.loading$ | async">
+        <mat-progress-bar
+          *ngIf="dataSource.loading$ | async"
+          mode="indeterminate"
+        ></mat-progress-bar>
+      </div>
+      <ion-card-content class="ion-no-padding">
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  placeholder="Purchase Invoice Number"
+                  formControlName="invoice_number"
+                  (keyup.enter)="setFilter()"
+                />
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <mat-label>Status</mat-label>
+                <mat-select
+                  formControlName="status"
+                  (selectionChange)="setFilter($event.value)"
+                >
+                  <mat-option
+                    *ngFor="let status of invoiceStatus"
+                    [value]="status"
+                  >
+                    {{status}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  placeholder="Supplier"
+                  [matAutocomplete]="supplierField"
+                  formControlName="supplier"
+                  (focusout)="validateInput(f.supplier, filteredSupplierList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #supplierField="matAutocomplete"
+                  [displayWith]="getSupplierOption"
+                  (optionSelected)="setFilter($event.option.value)"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredSupplierList | async"
+                    [value]="option"
+                  >
+                    {{ option.supplier_name }}
+                    
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.supplier.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.supplier.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-text color="medium" class="date-filter-text">
+                Range Date
+              </ion-text>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="fromDate"
+                  placeholder="From Date"
+                  readonly
+                  formControlName="fromDateFormControl"
+                  (dateChange)="dateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="fromDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #fromDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="toDate"
+                  placeholder="To Date"
+                  readonly
+                  formControlName="toDateFormControl"
+                  (dateChange)="dateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="toDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #toDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+            </ion-col>
+            <ion-col class="ion-text-center">
+              <ion-text color="medium" class="date-filter-text">
+                Single Date
+              </ion-text>
+              <mat-form-field class="full-width">
+                <input
+                  matInput
+                  [matDatepicker]="singleDate"
+                  placeholder="Select Date"
+                  readonly
+                  formControlName="singleDateFormControl"
+                  (dateChange)="singleDateFilter()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="singleDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #singleDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+              <ion-button
+                color="tertiary"
+                (click)="clearFilters()"
+                fill="outline"
+              >
+                Clear
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        <div class="example-container mat-elevation-z8">
+          <mat-table
+            [dataSource]="dataSource"
+            matSort
+            (matSortChange)="setFilter($event)"
+          >
+            <ng-container matColumnDef="sr_no">
+              <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+              <mat-cell *matCellDef="let row;let i=index ">
+                {{i+1}}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="purchase_invoice_number">
+              <mat-header-cell *matHeaderCellDef mat-sort-header="name">
+                Invoice No.
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <a [routerLink]="['/purchase/view-purchase-invoice',row.uuid]" >{{row.name}}</a>
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <mat-header-cell *matHeaderCellDef mat-sort-header="status"
+                >Status</mat-header-cell
+              >
+              <mat-cell *matCellDef="let row">
+                <ion-text
+                  [ngStyle]="{
+              color: ['Submitted','To Deliver'].includes(row.status) ? '#4d2500' : 
+              ['Completed'].includes(row.status) ? 'green' :
+              'red'
+            }"
+                >
+                  {{row.status}}
+                </ion-text>
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="delivered_percent">
+              <mat-header-cell *matHeaderCellDef>
+                Delivered
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <mat-progress-bar class="right-margin" [color]="row.delivered_percent === 100 ? 'primary' : 'warn'" mode="determinate" [value]="row.delivered_percent"></mat-progress-bar>
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <mat-header-cell *matHeaderCellDef mat-sort-header="created_on">
+                Date
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.posting_date | date: 'd MMM, y'}}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="supplier">
+              <mat-header-cell *matHeaderCellDef mat-sort-header="supplier">
+                Supplier
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.supplier_name}}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef style="justify-content: end;">
+                Total
+              </mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header="total"
+                style="display: flex; justify-content: center;"
+              >
+                Total
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{row.total | curFormat | async }}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef>
+                {{ total | curFormat | async }}
+              </mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="created_by">
+              <mat-header-cell *matHeaderCellDef>
+                Created By
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{ row.created_by }}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="delivered_by">
+              <mat-header-cell *matHeaderCellDef>
+                Delivered By
+              </mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                {{ (row.deliveredBy && row.deliveredBy[0]) ? row.deliveredBy[0]
+                : '' }}
+              </mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+
+            <mat-header-row
+              *matHeaderRowDef="displayedColumns; sticky: true"
+            ></mat-header-row>
+            <mat-row
+              *matRowDef="let row; columns: displayedColumns;"
+            ></mat-row>
+            <mat-footer-row
+              class="footer"
+              *matFooterRowDef="displayedColumns; sticky: true"
+            ></mat-footer-row>
+          </mat-table>
+        </div>
+        <mat-card-actions>
+          <mat-paginator
+            #paginator
+            class="mat-paginator-sticky"
+            (page)="getUpdate($event)"
+            [length]="dataSource.length"
+            [pageSizeOptions]="[30, 50, 100, 500]"
+          >
+          </mat-paginator>
+        </mat-card-actions>
+      </ion-card-content>
+    </form>
+  </ion-card>
+</ion-content>

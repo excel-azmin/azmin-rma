@@ -1,0 +1,153 @@
+<ion-card>
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary"> Stock Entry </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col
+          class="ion-text-right"
+          *ngIf="permissionState.rma_stock_entry.create"
+        >
+          <ion-button
+            *ngIf="
+              dataSource.length &&
+              !(
+                warrantyObject?.status_history[
+                  warrantyObject?.status_history.length - 1
+                ]?.verdict === 'Deliver to Customer'
+              )
+            "
+            color="danger"
+            fill="outline"
+            (click)="finalizeEntry()"
+          >
+            Finalize Stock Entry
+          </ion-button>
+
+          <ion-button
+            *ngIf="showAddButton"
+            color="tertiary"
+            [routerLink]="['/warranty/stock-entry', 'new', warrantyClaimUuid]"
+          >
+            Add
+          </ion-button>
+
+          <ion-card-subtitle
+            *ngIf="
+              warrantyObject?.status_history[
+                warrantyObject?.status_history.length - 1
+              ]?.verdict === 'Deliver to Customer'
+            "
+            color="danger"
+          >
+            Revert Stock Entries To Recreate
+          </ion-card-subtitle>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+
+  <ion-card-content class="ion-no-padding">
+    <div class="example-container mat-elevation-z8">
+      <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="stock_voucher_number">
+          <mat-header-cell *matHeaderCellDef>
+            Stock Voucher Number
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container *ngIf="row.stock_voucher_number">
+              {{ row.stock_id }}
+            </ng-container>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="claim_no">
+          <mat-header-cell *matHeaderCellDef>Claim No</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ warrantyObject?.claim_no }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.type }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="stock_entry_type">
+          <mat-header-cell *matHeaderCellDef>Stock Entry Type</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.stock_entry_type }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.posting_date }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.description }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="completed_by">
+          <mat-header-cell *matHeaderCellDef>Completed By</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.createdBy }}
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="rollback">
+          <mat-header-cell *matHeaderCellDef>Rollback</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <ion-button
+              *ngIf="permissionState.rma_stock_entry.cancel"
+              fill="clear"
+              class="ion-no-padding"
+              color="danger"
+              (click)="removeStockEntry(row)"
+            >
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-button>
+          </mat-cell>
+          <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        <mat-footer-row
+          class="footer"
+          *matFooterRowDef="displayedColumns; sticky: true"
+        ></mat-footer-row>
+      </table>
+    </div>
+    <mat-card-actions>
+      <mat-paginator
+        #paginator
+        class="mat-paginator-sticky"
+        (page)="getUpdate($event)"
+        [length]="dataSource.length"
+        [pageSizeOptions]="[30, 50, 100, 500]"
+      >
+      </mat-paginator>
+    </mat-card-actions>
+  </ion-card-content>
+</ion-card>

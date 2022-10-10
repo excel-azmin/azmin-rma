@@ -1,0 +1,51 @@
+  <ion-card-header>
+      <ion-card-title>
+          <ion-text color="tertiary">
+              Credit Note Items
+          </ion-text>
+      </ion-card-title>
+  </ion-card-header>
+  <ion-card-content class="ion-no-padding">
+      <mat-table #table [dataSource]="itemDataSource" style="width: 100%;">
+          <ng-container matColumnDef="item_name">
+              <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                  <ng-container>
+                      {{ row.item_name }}
+                  </ng-container>
+              </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="rate">
+            <mat-header-cell *matHeaderCellDef>Item Rate</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+                <ng-container>
+                    {{ row.rate }}
+                </ng-container>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+              <ng-container>
+                  {{ row.qty }}
+              </ng-container>
+          </mat-cell>
+      </ng-container>
+
+        <ng-container matColumnDef="credit_note_qty">
+            <mat-header-cell *matHeaderCellDef>Return Quantity</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+                <input matInput [(ngModel)]="row.credit_note_qty" type="number" />
+            </mat-cell>
+        </ng-container>
+
+          <mat-header-row *matHeaderRowDef="itemDisplayedColumns; sticky: true"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: itemDisplayedColumns; let i = index"></mat-row>
+      </mat-table>
+  </ion-card-content>
+
+  <div mat-dialog-actions>
+    <button mat-button color="primary" [mat-dialog-close]="data.items" cdkFocusInitial>Submit</button>
+</div>

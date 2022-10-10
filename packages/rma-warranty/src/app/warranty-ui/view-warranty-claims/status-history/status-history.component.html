@@ -1,0 +1,412 @@
+<form [formGroup]="statusHistoryForm">
+  <ion-card-title class="ion-text-center" *ngIf="check()">
+    Delivered to Customer
+  </ion-card-title>
+  <ion-card *ngIf="!check()">
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Details </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right" size="auto">
+          <ion-button
+            color="tertiary"
+            fill="outline"
+            matTooltip=" ( ctrl + i ) "
+            matTooltipPosition="above"
+            matTooltipClass="tooltip"
+            (ctrlI)="addStatusHistory()"
+            (click)="addStatusHistory()"
+            [disabled]="statusHistoryForm.invalid"
+          >
+            Add
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="i-no-padding">
+        <ion-row class="align">
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Status from"
+                formControlName="status_from"
+                [matAutocomplete]="receivingBranch"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #receivingBranch="matAutocomplete"
+              >
+                <mat-option *ngFor="let option of territory" [value]="option">
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="f.status_from.hasError('required')">
+                Status from is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Transfer branch"
+                formControlName="transfer_branch"
+                [matAutocomplete]="deliveryBranch"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #deliveryBranch="matAutocomplete"
+                [displayWith]="getBranchOption"
+              >
+                <mat-option
+                  *ngFor="let option of territoryList | async"
+                  [value]="option"
+                >
+                  {{ option.name }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="f.transfer_branch.hasError('required')">
+                Transfer Branch is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-row class="align">
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Current Status / Verdict"
+                formControlName="current_status_verdict"
+                [matAutocomplete]="currentState"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #currentState="matAutocomplete"
+                (optionSelected)="selectedCurrentStatus($event.option.value)"
+              >
+                <mat-option
+                  *ngFor="let option of currentStatus"
+                  [value]="option"
+                >
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="f.current_status_verdict.hasError('required')">
+                Current Status is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Delivery Status"
+                formControlName="delivery_status"
+                [matAutocomplete]="deliveryState"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #deliveryState="matAutocomplete"
+              >
+                <mat-option
+                  *ngFor="let option of deliveryStatus"
+                  [value]="option"
+                >
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="f.delivery_status.hasError('required')">
+                Delivery Status is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                [matDatepicker]="posting_date"
+                placeholder="Posting Date"
+                formControlName="posting_date"
+                (dateChange)="selectedPostingDate($event)"
+              />
+              <mat-datepicker-toggle
+                matSuffix
+                [for]="posting_date"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #posting_date disabled="false"></mat-datepicker>
+              <mat-error *ngIf="f.posting_date.hasError('required')">
+                Posting Date is <strong>required</strong>
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                matInput
+                type="text"
+                placeholder="Description"
+                formControlName="description"
+              />
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</form>
+<!-- 1 this is for list -->
+
+<ion-card *ngIf="dataSource">
+  <ion-card-header>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-text-left">
+          <ion-card-title>
+            <ion-text color="tertiary"> Status History </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-header>
+
+  <ion-card-content class="ion-no-padding">
+    <mat-table #table style="width: 100%" [dataSource]="dataSource">
+      <ng-container matColumnDef="posting_date">
+        <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container *ngIf="row.posting_date">
+            {{ row.posting_date }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="time">
+        <mat-header-cell *matHeaderCellDef>Posting Time</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.time }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="status_from">
+        <mat-header-cell *matHeaderCellDef>Status From</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.status_from }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="transfer_branch">
+        <mat-header-cell *matHeaderCellDef>Transfer Branch</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.transfer_branch }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="verdict">
+        <mat-header-cell *matHeaderCellDef>
+          Current Status / Verdict
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-container>
+            {{ row.verdict }}
+          </ng-container>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          {{ row.description }}
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="delivery_status">
+        <mat-header-cell *matHeaderCellDef>Delivery Status</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          {{ row.delivery_status }}
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status By</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          {{ row.status }}
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="rollback">
+        <mat-header-cell *matHeaderCellDef>Rollback</mat-header-cell>
+        <mat-cell *matCellDef="let row; let i = index">
+          <ion-button
+            fill="clear"
+            class="ion-no-padding"
+            color="danger"
+            *ngIf="i && this.dataSource?.data?.length === i + 1"
+            (click)="removeRow()"
+          >
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
+      </mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      <mat-footer-row
+        class="footer"
+        *matFooterRowDef="displayedColumns; sticky: true"
+      >
+      </mat-footer-row>
+    </mat-table>
+  </ion-card-content>
+</ion-card>
+
+<ion-card
+  *ngIf="
+    dataSource?.data?.length &&
+    dataSource?.data[dataSource?.data?.length - 1].delivery_status
+  "
+>
+  <ion-card-header>
+    <ion-row>
+      <ion-col class="ion-text-left">
+        <ion-card-title>
+          <ion-text color="tertiary">
+            Delivery Status:
+            {{ dataSource?.data[dataSource?.data?.length - 1].delivery_status }}
+          </ion-text>
+        </ion-card-title>
+      </ion-col>
+    </ion-row>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-grid
+      *ngIf="
+        dataSource?.data[dataSource?.data?.length - 1]?.delivery_status ===
+          'Upgraded' || 'Replaced'
+      "
+    >
+      <ion-row>
+        <ion-col>
+          <mat-form-field
+            class="example-full-width"
+            *ngIf="
+              dataSource?.data[dataSource?.data?.length - 1]
+                ?.delivery_status === 'Upgraded'
+            "
+          >
+            <input
+              matInput
+              readonly
+              type="text"
+              placeholder="Upgrade Warehouse"
+              [value]="this.dataSource.upgraded_warehouse$ | async"
+            />
+          </mat-form-field>
+          <mat-form-field
+            class="example-full-width"
+            *ngIf="
+              dataSource?.data[dataSource?.data?.length - 1]
+                ?.delivery_status === 'Replaced'
+            "
+          >
+            <input
+              matInput
+              readonly
+              type="text"
+              placeholder="Replace Warehouse"
+              [value]="this.dataSource.replaced_warehouse$ | async"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              [value]="warrantyObject?.damage_warehouse"
+              type="text"
+              readonly
+              placeholder="Damaged Warehouse"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              [value]="warrantyObject?.replace_product"
+              type="text"
+              readonly
+              placeholder="Replaced Product"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              [value]="warrantyObject?.damage_product"
+              type="text"
+              readonly
+              placeholder="Damaged Product"
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              [value]="warrantyObject?.replace_serial"
+              type="text"
+              readonly
+              placeholder="Replace Serial"
+            />
+          </mat-form-field>
+        </ion-col>
+        <ion-col>
+          <mat-form-field class="example-full-width">
+            <input
+              matInput
+              [value]="warrantyObject?.remarks"
+              type="text"
+              placeholder="Remarks"
+              readonly
+            />
+          </mat-form-field>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card-content>
+</ion-card>

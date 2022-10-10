@@ -1,0 +1,666 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title> Stock Entry </ion-title>
+    <ion-buttons slot="end" *ngIf="uuid">
+      <ion-button (click)="showJobs()" color="primary"> Jobs </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end" *ngIf="stock_receipt_names?.length">
+      <ion-button (click)="getPrint()" color="primary">
+        <ion-icon slot="icon-only" name="print-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page-background">
+  <form [formGroup]="form">
+    <ion-card>
+      <ion-card-header>
+        <ion-row class="align">
+          <ion-col>
+            <ion-card-title>
+              <ion-text color="tertiary">
+                {{ title }}
+              </ion-text> <br />
+              <ion-text color="tertiary">
+                {{ stock_id }}
+              </ion-text> <br />
+
+            </ion-card-title>
+          </ion-col>
+        </ion-row>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="ion-no-padding">
+          <ion-row>
+            <ion-col *ngIf="readonly">
+              <ion-button
+                [disabled]="!stock_receipt_names[0]"
+                (click)="openStockEntries()"
+                fill="clear"
+                shape="round"
+              >
+                Open All Entries
+              </ion-button>
+            </ion-col>
+            <ion-col class="ion-text-right">
+              <ion-button
+                *ngIf="status === 'Draft'"
+                color="danger"
+                fill="clear"
+                (click)="deleteStockEntry()"
+              >
+                <ion-icon name="trash"></ion-icon>
+              </ion-button>
+              <ion-button *ngIf="!readonly" color="light" (click)="saveDraft()">
+                Save
+              </ion-button>
+              <ion-button
+                *ngIf="!readonly"
+                [disabled]="!uuid || submit"
+                color="medium"
+                (click)="createMaterialTransfer()"
+              >
+                Submit
+              </ion-button>
+              <ion-button
+                *ngIf="
+                  readonly &&
+                  status === 'In Transit' &&
+                  permissionState?.stock_entry?.accept
+                "
+                [disabled]="submit"
+                color="tertiary"
+                (click)="acceptTransfer()"
+              >
+                Accept
+              </ion-button>
+              <ion-button
+                *ngIf="readonly && status === 'In Transit'"
+                [disabled]="submit"
+                color="light"
+                (click)="rejectTransfer()"
+              >
+                Return
+              </ion-button>
+              <ion-text
+                *ngIf="
+                  readonly && status !== 'In Transit' && status !== 'Draft'
+                "
+                [ngStyle]="{
+                  color: ['Returned', 'Reseted'].includes(status)
+                    ? 'red'
+                    : 'green'
+                }"
+              >
+                <h1>Stock Transfer {{ status }}</h1>
+              </ion-text>
+              <ion-button
+                *ngIf="
+                  readonly &&
+                  ['In Transit', 'Delivered', 'Returned'].includes(status)
+                "
+                color="danger"
+                (click)="resetStockEntry()"
+              >
+                Cancel
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  required
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Select territory"
+                  matInput
+                  (focusout)="validateInput(f.territory, territoryList)"
+                  formControlName="territory"
+                  [matAutocomplete]="territory"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #territory="matAutocomplete"
+                >
+                  <mat-option
+                    *ngFor="let territory of territoryList | async"
+                    [value]="territory"
+                  >
+                    {{ territory }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.territory.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{ f.territory.value }}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="example-full-width">
+                <mat-label>Stock Entry Type</mat-label>
+                <mat-select
+                  (selectionChange)="typeChange($event.value)"
+                  formControlName="stock_entry_type"
+                >
+                  <mat-option
+                    *ngFor="let type of stockEntryType"
+                    [value]="type"
+                  >
+                    {{ type }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field
+                *ngIf="
+                  [
+                    'Material Receipt',
+                    'Material Issue',
+                    'R&D Products'
+                  ].includes(f.stock_entry_type.value)
+                "
+                class="mat-input-wrapper"
+              >
+                <input
+                  matInput
+                  required
+                  placeholder="Account"
+                  aria-label="Account"
+                  [matAutocomplete]="expenseAccount"
+                  (focusout)="validateInput(f.accounts, accounts)"
+                  formControlName="accounts"
+                />
+                <mat-autocomplete #expenseAccount="matAutocomplete">
+                  <mat-option
+                    *ngFor="let account of accounts | async"
+                    [value]="account.name"
+                  >
+                    <span>{{ account.name }}</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.accounts.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{ f.accounts.value }}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  required
+                  matInput
+                  [matDatepicker]="postingDate"
+                  placeholder="Posting Date"
+                  formControlName="posting_date"
+                  (dateChange)="updateItemStock()"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="postingDate"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #postingDate disabled="false"></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field class="example-full-width">
+                <mat-label>Remarks</mat-label>
+                <textarea matInput formControlName="remarks"></textarea>
+              </mat-form-field>
+
+              <mat-form-field
+                *ngIf="
+                  ['R&D Products', 'Material Issue'].includes(
+                    f.stock_entry_type.value
+                  )
+                "
+                class="example-full-width"
+              >
+                <input
+                  required
+                  type="text"
+                  placeholder="Select Customer"
+                  matInput
+                  formControlName="customer"
+                  [matAutocomplete]="auto"
+                  (focusout)="validateInput(f.customer, filteredCustomerList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #auto="matAutocomplete"
+                  [displayWith]="getOptionText"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredCustomerList | async"
+                    [value]="option"
+                  >
+                    {{ option.customer_name }}
+                    <small class="text-muted">
+                      {{ option.name }}
+                    </small>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.customer.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{ f.customer.value }}'</strong> is not allowed.
+                </mat-error>
+                <mat-error *ngIf="f.customer.hasError('required')">
+                  Customer is <strong>required</strong>
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="!readonly">
+      <ion-card-header>
+        <ion-row class="align">
+          <ion-col>
+            <ion-card-title>
+              <ion-text color="tertiary"> Accounting Dimensions </ion-text>
+            </ion-card-title>
+          </ion-col>
+        </ion-row>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid class="ion-no-padding">
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="example-full-width">
+                <input
+                  type="text"
+                  placeholder="Project"
+                  matInput
+                  formControlName="project"
+                  (focusout)="validateInput(f.project, filteredProjectList)"
+                  [matAutocomplete]="project"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #project="matAutocomplete"
+                >
+                  <mat-option
+                    *ngFor="let project of filteredProjectList | async"
+                    [value]="project.name"
+                  >
+                    {{ project.name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.project.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{ f.project.value }}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </form>
+  <app-assign-serial
+    *ngIf="!readonly"
+    [state]="state"
+    [rangePickerState]="rangePickerState"
+    (sendPickerState)="assignPickerState($event)"
+    (sendCSVJSON)="addSerialsFromCsvJson($event)"
+  ></app-assign-serial>
+
+  <ion-card *ngIf="!readonly">
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Warehouse </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid class="ion-no-padding">
+        <ion-row>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                type="text"
+                placeholder="Source Warehouse"
+                matInput
+                [formControl]="warehouseState.s_warehouse"
+                (focusout)="
+                  validateInput(
+                    warehouseState.s_warehouse,
+                    filteredWarehouseList1
+                  )
+                "
+                [matAutocomplete]="from_warehouse"
+              />
+              <mat-autocomplete
+                (optionSelected)="updateItemStock($event.source.value)"
+                autoActiveFirstOption
+                #from_warehouse="matAutocomplete"
+              >
+                <mat-option
+                  *ngFor="let s_warehouse of filteredWarehouseList1 | async"
+                  [value]="s_warehouse"
+                >
+                  {{ s_warehouse }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error
+                *ngIf="warehouseState.s_warehouse.hasError('falseValse')"
+              >
+                You should select a value from dropdown only.
+                <strong>'{{ warehouseState.s_warehouse.value }}'</strong> is not
+                allowed.
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+          <ion-col>
+            <mat-form-field class="example-full-width">
+              <input
+                type="text"
+                placeholder="Target Warehouse"
+                matInput
+                (focusout)="
+                  validateInput(
+                    warehouseState.t_warehouse,
+                    filteredWarehouseList2
+                  )
+                "
+                [formControl]="warehouseState.t_warehouse"
+                [matAutocomplete]="warehouse"
+              />
+              <mat-autocomplete
+                autoActiveFirstOption
+                #warehouse="matAutocomplete"
+              >
+                <mat-option
+                  *ngFor="let warehouse of filteredWarehouseList2 | async"
+                  [value]="warehouse.name"
+                >
+                  {{ warehouse.name }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error
+                *ngIf="warehouseState.t_warehouse.hasError('falseValse')"
+              >
+                You should select a value from dropdown only.
+                <strong>'{{ warehouseState.t_warehouse.value }}'</strong> is not
+                allowed.
+              </mat-error>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!readonly">
+    <div class="loading-shade" *ngIf="itemDataSource?.loading$ | async">
+      <mat-progress-bar
+        *ngIf="itemDataSource?.loading$ | async"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Items </ion-text>
+          </ion-card-title>
+        </ion-col>
+        <ion-col class="ion-text-right">
+          <ion-button
+            [disabled]="readonly"
+            color="tertiary"
+            (click)="addItems()"
+          >
+            Add Item
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+
+    <ion-card-content class="ion-no-padding">
+      <mat-table #table [dataSource]="itemDataSource" style="width: 100%">
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="delete">
+          <mat-header-cell *matHeaderCellDef>Delete Item</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <ion-button
+              color="danger"
+              fill="clear"
+              (click)="deleteItemRow(row, i)"
+            >
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="assigned">
+          <mat-header-cell *matHeaderCellDef>Assigned</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.assigned || 0 }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="available_stock">
+          <mat-header-cell *matHeaderCellDef>Available Stock</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.available_stock || 0 }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Qty</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              <input
+                class="table-text-align-center"
+                matInput
+                type="number"
+                [(ngModel)]="row.qty"
+              />
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="basic_rate">
+          <mat-header-cell *matHeaderCellDef>Base Rate</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              <input
+                class="table-text-align-center"
+                matInput
+                type="number"
+                [(ngModel)]="row.basic_rate"
+              />
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="has_serial_no">
+          <mat-header-cell *matHeaderCellDef>Has Serial</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <mat-checkbox
+              class="example-margin"
+              [(ngModel)]="row.has_serial_no"
+              [disabled]="true"
+            >
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="add_serial">
+          <mat-header-cell *matHeaderCellDef>Add Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ion-button fill="outline" (click)="addRow(row)">
+              <ion-icon name="Add"></ion-icon>
+            </ion-button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="itemDisplayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row *matRowDef="let row; columns: itemDisplayedColumns"></mat-row>
+      </mat-table>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-row class="align">
+        <ion-col>
+          <ion-card-title>
+            <ion-text color="tertiary"> Transfer Serials </ion-text>
+          </ion-card-title>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+
+    <ion-card-content class="ion-no-padding">
+      <mat-table
+        #table
+        [dataSource]="materialTransferDataSource"
+        style="width: 100%"
+      >
+        <ng-container matColumnDef="s_warehouse">
+          <mat-header-cell *matHeaderCellDef>Source Warehouse</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.s_warehouse }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="t_warehouse">
+          <mat-header-cell *matHeaderCellDef>Target Warehouse</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.t_warehouse }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="item_name">
+          <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.item_name }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="qty">
+          <mat-header-cell *matHeaderCellDef>Quantity</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container>
+              {{ row.qty }}
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="warranty_date">
+          <mat-header-cell *matHeaderCellDef>Warranty Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <input
+              matInput
+              [disabled]="readonly && status !== 'Draft'"
+              [(ngModel)]="row.warranty_date"
+              [matDatepicker]="warranty_date"
+              disabled
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="warranty_date"
+            ></mat-datepicker-toggle>
+            <mat-datepicker
+              #warranty_date
+              [disabled]="readonly && status !== 'Draft'"
+            ></mat-datepicker>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="serial_no">
+          <mat-header-cell *matHeaderCellDef>Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <input
+              (keyup.enter)="onSerialKepUp(i)"
+              matInput
+              id="serials{{ i }}"
+              oninput="this.value = this.value.toUpperCase()"
+              *ngIf="!row.serial_no[1]"
+              [disabled]="row.serial_no[0] === 'Non Serial Item' ? true : false"
+              [(ngModel)]="row.serial_no[0]"
+            />
+            <p *ngIf="row.serial_no.length === 1 ? false : true">
+              {{ getSerialsInputValue(row) }}
+            </p>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="basic_rate">
+          <mat-header-cell *matHeaderCellDef>Base Rate</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container *ngIf="permissionState?.stock_entry_receipt?.read">
+              <input
+                class="table-text-align-center"
+                matInput
+                type="number"
+                [disabled]="readonly && status !== 'Draft'"
+                [(ngModel)]="row.basic_rate"
+              />
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="delete">
+          <mat-header-cell *matHeaderCellDef>Delete Serials</mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index">
+            <ion-button
+              [disabled]="readonly"
+              color="danger"
+              fill="clear"
+              (click)="deleteRow(row, i)"
+            >
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="materialTransferDisplayedColumns; sticky: true"
+        ></mat-header-row>
+        <mat-row
+          *matRowDef="
+            let row;
+            columns: materialTransferDisplayedColumns;
+            let i = index
+          "
+        ></mat-row>
+      </mat-table>
+    </ion-card-content>
+  </ion-card>
+
+  <app-delivered-serials
+    *ngIf="readonly && status !== 'Reseted'"
+    [deliveredSerialsState]="deliveredSerialsState"
+  ></app-delivered-serials>
+</ion-content>

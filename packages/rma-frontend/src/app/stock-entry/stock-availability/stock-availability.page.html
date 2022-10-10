@@ -1,0 +1,227 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navigateBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Stock Availability</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<div class="loading-shade" *ngIf="dataSource.loading$ | async">
+  <mat-progress-bar
+    *ngIf="dataSource.loading$ | async"
+    mode="indeterminate"
+  ></mat-progress-bar>
+</div>
+
+<ion-content color="light">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-text color="primary">
+          Stock Availability
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <form [formGroup]="stockAvailabilityForm">
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Item name"
+                  [matAutocomplete]="itemName"
+                  formControlName="itemName"
+                  (focusout)="validateInput(f.itemName, filteredStockAvailabilityList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemName="matAutocomplete"
+                  [displayWith]="getStockAvailabilityOption"
+                  (optionSelected)="setFilter()"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredStockAvailabilityList | async"
+                    [value]="option"
+                  >
+                    {{ option.item_name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.itemName.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.itemName.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Warehouse"
+                  [matAutocomplete]="warehouse"
+                  formControlName="warehouse"
+                  (focusout)="validateInput(f.warehouse, filteredWarehouseList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #warehouse="matAutocomplete"
+                  (optionSelected)="setFilter()"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredWarehouseList | async"
+                    [value]="option"
+                  >
+                    {{ option }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.warehouse.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.warehouse.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Item Group"
+                  [matAutocomplete]="itemGroupAutocomplete"
+                  formControlName="excel_item_group"
+                  (focusout)="validateInput(f.excel_item_group, filteredItemGroupList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemGroupAutocomplete="matAutocomplete"
+                  [displayWith]="getItemGroupOption"
+                  (optionSelected)="setFilter()"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredItemGroupList | async"
+                    [value]="option"
+                  >
+                    {{ option.item_group_name }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.excel_item_group.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.excel_item_group.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+            </ion-col>
+
+            <ion-col>
+              <mat-form-field class="mat-input-wrapper">
+                <input
+                  matInput
+                  placeholder="Brand"
+                  [matAutocomplete]="itemBrandAutocomplete"
+                  formControlName="excel_item_brand"
+                  (focusout)="validateInput(f.excel_item_brand, filteredItemBrandList)"
+                />
+                <mat-autocomplete
+                  autoActiveFirstOption
+                  #itemBrandAutocomplete="matAutocomplete"
+                  [displayWith]="getItemBrandOption"
+                  (optionSelected)="setFilter()"
+                >
+                  <mat-option
+                    *ngFor="let option of filteredItemBrandList | async"
+                    [value]="option"
+                  >
+                    {{ option.brand }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="f.excel_item_brand.hasError('falseValse')">
+                  You should select a value from dropdown only.
+                  <strong>'{{f.excel_item_brand.value}}'</strong> is not allowed.
+                </mat-error>
+              </mat-form-field>
+                <mat-checkbox 
+                  (change)=setFilter();
+                  formControlName="actual_qty">
+                  Show Zero Stock
+                </mat-checkbox>
+              <ion-button
+              color="tertiary"
+              (click)="clearFilters()"
+              fill="outline"
+            >
+              Clear
+            </ion-button>
+            <ion-button
+            color="tertiary"
+            [disabled]="!dataSource.length"
+            (click)="downloadServiceInvoices()"
+            fill="outline"
+          >
+            Download CSV
+          </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </form>
+
+      <div class="example-container mat-elevation-z8">
+        <table
+          mat-table
+          class="full-width-table"
+          [dataSource]="dataSource"
+          matSort
+        >
+          <ng-container matColumnDef="excel_item_name">
+            <mat-header-cell *matHeaderCellDef>Item name</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.item.item_name }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="item_code">
+            <mat-header-cell *matHeaderCellDef>Item code</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row._id.item_code }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="excel_item_group">
+            <mat-header-cell *matHeaderCellDef>Item group</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.item.item_group }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="excel_item_brand">
+            <mat-header-cell *matHeaderCellDef>Item brand</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.item.brand }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="warehouse">
+            <mat-header-cell *matHeaderCellDef>Warehouse</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row._id.warehouse }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="actual_qty">
+            <mat-header-cell *matHeaderCellDef>Actual quantity</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.stockAvailability }}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
+          </mat-header-row>
+
+          <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+        </table>
+      </div>
+      <mat-card-actions>
+        <mat-paginator
+          #paginator
+          class="mat-paginator-sticky"
+          (page)="getUpdate($event)"
+          [length]="dataSource.length"
+          [pageSizeOptions]="[30, 50, 100, 500,1000]"
+        >
+        </mat-paginator>
+      </mat-card-actions>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

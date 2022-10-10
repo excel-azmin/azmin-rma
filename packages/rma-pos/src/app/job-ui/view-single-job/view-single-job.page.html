@@ -1,0 +1,41 @@
+
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <ion-grid fixed>
+            <ion-row>
+              <ion-col >
+                Status : <ion-text color="primary"> {{ data?.data?.status }} </ion-text>
+              </ion-col>
+              <ion-col *ngIf="state.reset">
+                <ion-buttons>
+                  <ion-button (click)="resetJob()" color="danger">
+                    Reset
+                  </ion-button>
+                </ion-buttons>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col >
+                Parent : <ion-text color="primary"> {{ data?.data?.parent}} </ion-text>
+              </ion-col>
+              <ion-col *ngIf="state.retry">
+                <ion-buttons  >
+                  <ion-button (click)="retryJob()" color="primary">
+                    Requeue
+                  </ion-button>
+                </ion-buttons>
+              </ion-col>
+              <ion-col *ngIf="state.sync">
+                <ion-buttons  >
+                  <ion-button (click)="syncJob()" color="secondary">
+                    Sync
+                  </ion-button>
+                </ion-buttons>
+              </ion-col>
+            </ion-row>
+      </ion-grid>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<div [innerHTML]="message"></div>
